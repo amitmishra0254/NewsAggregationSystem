@@ -11,14 +11,14 @@ namespace NewsAggregationSystem.API.Controllers
     public class ArticlesController : BaseController
     {
         private readonly IArticleService articleService;
+
         public ArticlesController(IArticleService articleService)
         {
             this.articleService = articleService;
         }
 
-        [Authorize(Roles = "User")]
-        [HttpGet]
-        public async Task<ActionResult<List<ArticleDTO>>> GetAll([FromBody] NewsArticleRequestDTO newsArticleRequestDTO)
+        [HttpGet, Authorize(Roles = ApplicationConstants.AdminUser)]
+        public async Task<IActionResult> GetAll([FromBody] NewsArticleRequestDTO newsArticleRequestDTO)
         {
             try
             {
@@ -31,7 +31,7 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpDelete("saved-articles/{Id:int}"), Authorize(Roles = ApplicationConstants.AdminUser)]
-        public async Task<ActionResult<List<ArticleDTO>>> Delete(int Id)
+        public async Task<IActionResult> Delete(int Id)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpGet("saved-articles"), Authorize(Roles = ApplicationConstants.AdminUser)]
-        public async Task<ActionResult<List<ArticleDTO>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
@@ -56,12 +56,12 @@ namespace NewsAggregationSystem.API.Controllers
             }
         }
 
-        [HttpGet("save-article{articleId:int}"), Authorize(Roles = ApplicationConstants.AdminUser)]
-        public async Task<ActionResult<List<ArticleDTO>>> SaveArticle(int articleId)
+        [HttpGet("save-article{Id:int}"), Authorize(Roles = ApplicationConstants.AdminUser)]
+        public async Task<IActionResult> SaveArticle(int Id)
         {
             try
             {
-                return Ok(await articleService.SaveArticle(articleId, LoggedInUserId));
+                return Ok(await articleService.SaveArticle(Id, LoggedInUserId));
             }
             catch (Exception exception)
             {
@@ -69,12 +69,12 @@ namespace NewsAggregationSystem.API.Controllers
             }
         }
 
-        [HttpGet("{articleId}"), Authorize(Roles = ApplicationConstants.AdminUser)]
-        public async Task<ActionResult<ArticleDTO>> GetById(int articleId)
+        [HttpGet("{Id}"), Authorize(Roles = ApplicationConstants.AdminUser)]
+        public async Task<IActionResult> GetById(int Id)
         {
             try
             {
-                var article = await articleService.GetArticleById(articleId);
+                var article = await articleService.GetArticleById(Id);
                 if (article == null)
                     return NotFound();
 
