@@ -8,7 +8,7 @@ namespace NewsAggregationSystem.API.MapperProfiles
     {
         public NotificationProfiles()
         {
-            CreateMap<GetAllNotificationsDTO, Notification>().ReverseMap();
+            CreateMap<NotificationDTO, Notification>().ReverseMap();
         }
     }
 }

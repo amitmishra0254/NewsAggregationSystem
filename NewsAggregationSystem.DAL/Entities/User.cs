@@ -13,6 +13,7 @@ namespace NewsAggregationSystem.DAL.Entities
             UserRoles = new HashSet<UserRole>();
             SavedArticles = new HashSet<SavedArticle>();
             ReactedArticles = new HashSet<ArticleReaction>();
+            ReportedArticles = new HashSet<ReportedArticle>();
         }
         [Key]
         public int Id { get; set; }
@@ -40,5 +41,6 @@ namespace NewsAggregationSystem.DAL.Entities
         public virtual ICollection<SavedArticle> SavedArticles { get; set; }
         public virtual ICollection<ArticleReaction> ReactedArticles { get; set; }
         public virtual ICollection<UserRole> UserRoles { get; set; }
+        public virtual ICollection<ReportedArticle> ReportedArticles { get; set; }
     }
 }

@@ -5,5 +5,6 @@ namespace NewsAggregationSystem.DAL.Repositories.NewsSources
 {
     public interface INewsSourceRepository : IRepositoryBase<NewsSource>
     {
+        Task<int> ChangeNewsSourceStatus(bool newsSourceStatus, NewsSource newsSource);
     }
 }

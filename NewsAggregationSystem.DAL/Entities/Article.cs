@@ -20,7 +20,12 @@ namespace NewsAggregationSystem.DAL.Entities
         [MaxLength(255)]
         public string? Author { get; set; }
         public string? Content { get; set; }
+        public bool IsHidden { get; set; }
         public int NewsCategoryId { get; set; }
         public virtual NewsCategory NewsCategory { get; set; }
+        public virtual ICollection<ArticleReaction> ArticleReactions { get; set; } = new List<ArticleReaction>();
+        public virtual ICollection<ReportedArticle> ReportedArticles { get; set; } = new List<ReportedArticle>();
+        public virtual ICollection<SavedArticle> SavedArticles { get; set; } = new List<SavedArticle>();
+        public virtual ICollection<ArticleReadHistory> ArticleReadHistory { get; set; } = new List<ArticleReadHistory>();
     }
 }

@@ -2,6 +2,6 @@
 {
     public interface IMainMenuHandler
     {
-        Task ShowWelcomeMenuAsync();
+        Task ShowWelcomeMenu();
     }
 }

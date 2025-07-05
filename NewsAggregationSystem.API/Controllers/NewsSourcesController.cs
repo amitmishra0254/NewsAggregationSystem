@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using NewsAggregationSystem.API.Services.NewsSources;
 using NewsAggregationSystem.Common.DTOs.NewsSources;
+using NewsAggregationSystem.Common.Exceptions;
+using NewsAggregationSystem.Service.Interfaces;
 
 namespace NewsAggregationSystem.API.Controllers
 {
@@ -10,7 +11,6 @@ namespace NewsAggregationSystem.API.Controllers
     {
         private readonly INewsSourceService service;
         private readonly ILogger<NewsSourcesController> logger;
-        private readonly int LoggerInUserId = 10;
 
         public NewsSourcesController(INewsSourceService service, ILogger<NewsSourcesController> logger)
         {
@@ -23,7 +23,9 @@ namespace NewsAggregationSystem.API.Controllers
         {
             try
             {
-                return Ok(await service.GetAll());
+                var sources = await service.GetAll();
+                logger.LogInformation("Fetched {Count} news sources.", sources.Count);
+                return Ok(sources);
             }
             catch (Exception exception)
             {
@@ -35,10 +37,18 @@ namespace NewsAggregationSystem.API.Controllers
         [HttpGet("{Id}")]
         public async Task<IActionResult> GetById(int Id)
         {
+            logger.LogInformation("Fetching news source with ID: {Id}", Id);
             try
             {
                 var source = await service.GetById(Id);
-                return source == null ? NotFound() : Ok(source);
+                if (source == null)
+                {
+                    logger.LogWarning("News source with ID: {Id} not found.", Id);
+                    return NotFound();
+                }
+
+                logger.LogInformation("News source with ID: {Id} fetched successfully.", Id);
+                return Ok(source);
             }
             catch (Exception exception)
             {
@@ -50,9 +60,11 @@ namespace NewsAggregationSystem.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] CreateNewsSourceDTO newsSource)
         {
+            logger.LogInformation("Adding new news source with name: {Name}", newsSource.Name);
             try
             {
-                await service.Add(newsSource, LoggerInUserId);
+                await service.Add(newsSource, LoggedInUserId);
+                logger.LogInformation("News source '{Name}' added successfully by user ID: {UserId}", newsSource.Name, LoggedInUserId);
                 return Ok();
             }
             catch (Exception exception)
@@ -65,10 +77,17 @@ namespace NewsAggregationSystem.API.Controllers
         [HttpPut("{Id}")]
         public async Task<IActionResult> Update(int Id, [FromBody] UpdateNewsSourceDTO newsSource)
         {
+            logger.LogInformation("Updating news source ID: {Id}", Id);
             try
             {
-                await service.Update(Id, newsSource, LoggerInUserId);
+                await service.Update(Id, newsSource, LoggedInUserId);
+                logger.LogInformation("News source ID: {Id} updated successfully by user ID: {UserId}", Id, LoggedInUserId);
                 return Ok();
+            }
+            catch (NotFoundException exception)
+            {
+                logger.LogError(exception, exception.Message);
+                return NotFound(exception.Message);
             }
             catch (Exception exception)
             {
@@ -80,10 +99,17 @@ namespace NewsAggregationSystem.API.Controllers
         [HttpDelete("{Id}")]
         public async Task<IActionResult> Delete(int Id)
         {
+            logger.LogInformation("Deleting news source with ID: {Id}", Id);
             try
             {
                 await service.Delete(Id);
+                logger.LogInformation("News source with ID: {Id} deleted successfully.", Id);
                 return Ok();
+            }
+            catch (NotFoundException exception)
+            {
+                logger.LogError(exception, exception.Message);
+                return NotFound(exception.Message);
             }
             catch (Exception exception)
             {

@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NewsAggregationSystem.API.Services.Authentication;
-using NewsAggregationSystem.API.Services.Users;
 using NewsAggregationSystem.Common.Constants;
 using NewsAggregationSystem.Common.DTOs.Authenticate;
 using NewsAggregationSystem.Common.DTOs.Users;
 using NewsAggregationSystem.Common.Exceptions;
+using NewsAggregationSystem.Service.Interfaces;
 
 namespace NewsAggregationSystem.API.Controllers
 {
@@ -29,20 +28,26 @@ namespace NewsAggregationSystem.API.Controllers
         [HttpPost("sign-up"), AllowAnonymous]
         public async Task<IActionResult> Add([FromBody] UserRequestDTO userRequest)
         {
+            logger.LogInformation(ApplicationConstants.LogMessage.SigningUpUser, userRequest.Email);
             try
             {
-                return CreatedAtAction(nameof(Add), await userService.AddUser(userRequest));
+                var createdUser = await userService.AddUser(userRequest);
+                logger.LogInformation(ApplicationConstants.LogMessage.UserSignedUpSuccessfully, userRequest.Email);
+                return CreatedAtAction(nameof(Add), createdUser);
             }
             catch (AlreadyExistException exception)
             {
+                logger.LogError(exception, exception.Message);
                 return StatusCode(StatusCodes.Status409Conflict, exception.Message);
             }
             catch (NotFoundException exception)
             {
+                logger.LogError(exception, exception.Message);
                 return StatusCode(StatusCodes.Status404NotFound, exception.Message);
             }
             catch (Exception exception)
             {
+                logger.LogError(exception, exception.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
             }
         }
@@ -50,27 +55,35 @@ namespace NewsAggregationSystem.API.Controllers
         [HttpPost("login"), AllowAnonymous]
         public async Task<IActionResult> Login(LoginRequestDTO loginRequest)
         {
+            logger.LogInformation(ApplicationConstants.LogMessage.UserLoginAttempt, loginRequest.Email);
             try
             {
-                return Ok(await authService.Login(loginRequest));
+                var result = await authService.Login(loginRequest);
+                logger.LogInformation(ApplicationConstants.LogMessage.UserLoggedInSuccessfully, loginRequest.Email);
+
+                return Ok(result);
             }
-            catch (NotFoundException ex)
+            catch (NotFoundException exception)
             {
-                return NotFound(ex.Message);
+                logger.LogError(exception, exception.Message);
+                return NotFound(exception.Message);
             }
-            catch (InvalidCredentialsException ex)
+            catch (InvalidCredentialsException exception)
             {
-                return BadRequest(ex.Message);
+                logger.LogError(exception, exception.Message);
+                return Unauthorized(exception.Message);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                return StatusCode(500, new { error = ApplicationConstants.UnexpectedError });
+                logger.LogError(exception, exception.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
             }
         }
-        [Authorize(Roles = ApplicationConstants.AdminUser)]
+        [Authorize(Roles = ApplicationConstants.UserOnly)]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
+            logger.LogInformation(ApplicationConstants.LogMessage.UserLogoutAttempt);
             try
             {
                 Response.Cookies.Append("accessToken", "", new CookieOptions
@@ -80,12 +93,13 @@ namespace NewsAggregationSystem.API.Controllers
                     Secure = true,
                     SameSite = SameSiteMode.Strict
                 });
-
+                logger.LogInformation(ApplicationConstants.LogMessage.UserLoggedOutSuccessfully);
                 return Ok(new { message = "User logged out successfully." });
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Error = ApplicationConstants.UnexpectedError });
+                logger.LogError(exception, exception.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
             }
         }
     }

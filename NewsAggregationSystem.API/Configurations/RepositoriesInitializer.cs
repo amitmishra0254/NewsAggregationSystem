@@ -4,6 +4,7 @@ using NewsAggregationSystem.DAL.Repositories.NewsCategories;
 using NewsAggregationSystem.DAL.Repositories.NewsSources;
 using NewsAggregationSystem.DAL.Repositories.NotificationPreferences;
 using NewsAggregationSystem.DAL.Repositories.Notifications;
+using NewsAggregationSystem.DAL.Repositories.Reports;
 using NewsAggregationSystem.DAL.Repositories.Users;
 
 namespace NewsAggregationSystem.API.Configurations
@@ -20,6 +21,7 @@ namespace NewsAggregationSystem.API.Configurations
             serviceCollection.AddScoped<INotificationRepository, NotificationRepository>();
             serviceCollection.AddScoped<IUserRepository, UserRepository>();
             serviceCollection.AddScoped<INewsCategoryRepository, NewsCategoryRepository>();
+            serviceCollection.AddScoped<IReportRepository, ReportRepository>();
         }
     }
 }

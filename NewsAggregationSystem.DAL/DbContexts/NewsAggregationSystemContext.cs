@@ -25,6 +25,8 @@ namespace NewsAggregationSystem.DAL.DbContexts
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserRole> UserRoles { get; set; }
         public virtual DbSet<UserNewsKeyword> UserNewsKeywords { get; set; }
+        public virtual DbSet<HiddenArticleKeyword> HiddenArticleKeywords { get; set; }
+        public virtual DbSet<ArticleReadHistory> ArticleReadHistories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -45,6 +47,12 @@ namespace NewsAggregationSystem.DAL.DbContexts
             {
                 notification.Property(prop => prop.IsRead)
                 .HasDefaultValue(false);
+            });
+
+            modelBuilder.Entity<UserNewsKeyword>(userNewsKeyword =>
+            {
+                userNewsKeyword.Property(prop => prop.IsEnabled)
+                .HasDefaultValue(true);
             });
 
             modelBuilder.Entity<NotificationPreference>(notificationPreference =>

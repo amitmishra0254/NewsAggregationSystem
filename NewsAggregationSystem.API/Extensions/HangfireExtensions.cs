@@ -1,5 +1,5 @@
 ﻿using Hangfire;
-using NewsAggregationSystem.API.Services.Scheduler;
+using NewsAggregationSystem.API.Scheduler;
 
 namespace NewsAggregationSystem.API.Extensions
 {
@@ -10,7 +10,7 @@ namespace NewsAggregationSystem.API.Extensions
             RecurringJob.AddOrUpdate<NewsFetchScheduler>(
                 "fetch-news-job",
                 scheduler => scheduler.ExecuteAsync(),
-                Cron.MinuteInterval(59) // every 3 hours
+                Cron.DayInterval(1) // every 3 hours
             );
         }
     }

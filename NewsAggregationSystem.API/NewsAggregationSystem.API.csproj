@@ -24,6 +24,7 @@
     <ProjectReference Include="..\NewsAggregationSystem.Common\NewsAggregationSystem.Common.csproj" />
     <ProjectReference Include="..\NewsAggregationSystem.DAL\NewsAggregationSystem.DAL.csproj" />
     <ProjectReference Include="..\NewsAggregationSystem.Migrations\NewsAggregationSystem.Migrations.csproj" />
+    <ProjectReference Include="..\NewsAggregationSystem.Service\NewsAggregationSystem.Service.csproj" />
   </ItemGroup>
 
 </Project>

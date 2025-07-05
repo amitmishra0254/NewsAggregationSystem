@@ -9,5 +9,12 @@ namespace NewsAggregationSystem.DAL.Entities
         public int Id { get; set; }
         [MaxLength(100)]
         public string Name { get; set; }
+        public bool IsEnabled { get; set; }
+        public int UserId { get; set; }
+        [ForeignKey(nameof(UserId))]
+        public virtual User User { get; set; }
+        public int NewsCategoryId { get; set; }
+        [ForeignKey(nameof(NewsCategoryId))]
+        public virtual NewsCategory NewsCategory { get; set; }
     }
 }

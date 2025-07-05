@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using NewsAggregationSystem.API.Services.Scheduler;
-using NewsAggregationSystem.API.Services.Users;
+using NewsAggregationSystem.Service.Interfaces;
 
 namespace NewsAggregationSystem.API.Controllers
 {
@@ -9,17 +8,30 @@ namespace NewsAggregationSystem.API.Controllers
     public class UsersController : BaseController
     {
         private readonly IUserService userService;
-        private readonly NewsFetchScheduler newsFetchScheduler;
-        public UsersController(IUserService userService, NewsFetchScheduler newsFetchScheduler)
+        private readonly ILogger<UsersController> logger;
+
+        public UsersController(IUserService userService, ILogger<UsersController> logger)
         {
             this.userService = userService;
-            this.newsFetchScheduler = newsFetchScheduler;
+            this.logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await userService.GetAllUsers());
+            logger.LogInformation("Fetching all users.");
+
+            try
+            {
+                var users = await userService.GetAllUsers();
+                logger.LogInformation("Fetched {Count} users successfully.", users.Count);
+                return Ok(users);
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, exception.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
+            }
         }
     }
 }

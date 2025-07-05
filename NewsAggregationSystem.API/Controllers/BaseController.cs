@@ -11,7 +11,7 @@ namespace NewsAggregationSystem.API.Controllers
         {
             get
             {
-                return Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                return Convert.ToInt32(User.Claims.FirstOrDefault(c => c.Type == "Id")?.Value);
             }
         }
 

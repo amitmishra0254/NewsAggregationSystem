@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NewsAggregationSystem.Common\NewsAggregationSystem.Common.csproj" />
+	<PackageReference Include="Spectre.Console" Version="0.50.0" />
   </ItemGroup>
 
 </Project>

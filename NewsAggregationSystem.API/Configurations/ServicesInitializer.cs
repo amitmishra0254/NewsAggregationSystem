@@ -1,13 +1,8 @@
-﻿using NewsAggregationSystem.API.Services.Articles;
-using NewsAggregationSystem.API.Services.Authentication;
-using NewsAggregationSystem.API.Services.NewsArticleClassifier;
-using NewsAggregationSystem.API.Services.NewsCategories;
-using NewsAggregationSystem.API.Services.NewsSources;
-using NewsAggregationSystem.API.Services.NewsSources.NewsFetcher;
-using NewsAggregationSystem.API.Services.NotificationPreferences;
-using NewsAggregationSystem.API.Services.Notifications;
-using NewsAggregationSystem.API.Services.Scheduler;
-using NewsAggregationSystem.API.Services.Users;
+﻿using NewsAggregationSystem.API.Adapters;
+using NewsAggregationSystem.API.Adapters.Interfaces;
+using NewsAggregationSystem.API.Scheduler;
+using NewsAggregationSystem.Service.Interfaces;
+using NewsAggregationSystem.Service.Services;
 
 namespace NewsAggregationSystem.API.Configurations
 {
@@ -22,10 +17,11 @@ namespace NewsAggregationSystem.API.Configurations
             serviceCollection.AddScoped<INewsCategoryService, NewsCategoryService>();
             serviceCollection.AddScoped<INewsApiAdapter, NewsApiAdapter>();
             serviceCollection.AddScoped<INewsApiAdapter, TheNewsApiAdapter>();
-            serviceCollection.AddScoped<INewsSourceService, NewsSourceService>();
             serviceCollection.AddScoped<INotificationPreferenceService, NotificationPreferenceService>();
             serviceCollection.AddScoped<INotificationService, NotificationService>();
             serviceCollection.AddScoped<IUserService, UserService>();
+            serviceCollection.AddScoped<IHiddenArticleKeywordService, HiddenArticleKeywordService>();
+            serviceCollection.AddScoped<IReportService, ReportService>();
             serviceCollection.AddScoped<NewsFetchScheduler>();
             serviceCollection.AddHttpClient();
         }

@@ -49,6 +49,9 @@ namespace NewsAggregationSystem.Migrations.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("bit");
+
                     b.Property<int?>("ModifiedById")
                         .HasColumnType("int");
 
@@ -119,6 +122,70 @@ namespace NewsAggregationSystem.Migrations.Migrations
                     b.ToTable("ArticleReactions");
                 });
 
+            modelBuilder.Entity("NewsAggregationSystem.DAL.Entities.ArticleReadHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2(2)");
+
+                    b.Property<int?>("ModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2(2)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArticleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ArticleReadHistories");
+                });
+
+            modelBuilder.Entity("NewsAggregationSystem.DAL.Entities.HiddenArticleKeyword", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2(2)");
+
+                    b.Property<int?>("ModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2(2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HiddenArticleKeywords");
+                });
+
             modelBuilder.Entity("NewsAggregationSystem.DAL.Entities.NewsCategory", b =>
                 {
                     b.Property<int>("Id")
@@ -132,6 +199,9 @@ namespace NewsAggregationSystem.Migrations.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2(2)");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("bit");
 
                     b.Property<int?>("ModifiedById")
                         .HasColumnType("int");
@@ -273,16 +343,11 @@ namespace NewsAggregationSystem.Migrations.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserNewsKeywordId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("NewsCategoryId");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserNewsKeywordId");
 
                     b.ToTable("NotificationPreferences");
                 });
@@ -315,6 +380,61 @@ namespace NewsAggregationSystem.Migrations.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Reactions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedById = -1,
+                            CreatedDate = new DateTime(2025, 6, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Like"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedById = -1,
+                            CreatedDate = new DateTime(2025, 6, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Dislike"
+                        });
+                });
+
+            modelBuilder.Entity("NewsAggregationSystem.DAL.Entities.ReportedArticle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2(2)");
+
+                    b.Property<int?>("ModifiedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2(2)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArticleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ReportedArticle");
                 });
 
             modelBuilder.Entity("NewsAggregationSystem.DAL.Entities.Role", b =>
@@ -498,6 +618,11 @@ namespace NewsAggregationSystem.Migrations.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2(2)");
 
+                    b.Property<bool>("IsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<int?>("ModifiedById")
                         .HasColumnType("int");
 
@@ -509,7 +634,17 @@ namespace NewsAggregationSystem.Migrations.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("NewsCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("NewsCategoryId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserNewsKeywords");
                 });
@@ -567,7 +702,7 @@ namespace NewsAggregationSystem.Migrations.Migrations
             modelBuilder.Entity("NewsAggregationSystem.DAL.Entities.ArticleReaction", b =>
                 {
                     b.HasOne("NewsAggregationSystem.DAL.Entities.Article", "Article")
-                        .WithMany()
+                        .WithMany("ArticleReactions")
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -585,6 +720,25 @@ namespace NewsAggregationSystem.Migrations.Migrations
                     b.Navigation("Article");
 
                     b.Navigation("Reaction");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NewsAggregationSystem.DAL.Entities.ArticleReadHistory", b =>
+                {
+                    b.HasOne("NewsAggregationSystem.DAL.Entities.Article", "Article")
+                        .WithMany()
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NewsAggregationSystem.DAL.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
 
                     b.Navigation("User");
                 });
@@ -614,21 +768,34 @@ namespace NewsAggregationSystem.Migrations.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NewsAggregationSystem.DAL.Entities.UserNewsKeyword", "UserNewsKeyword")
-                        .WithMany()
-                        .HasForeignKey("UserNewsKeywordId");
-
                     b.Navigation("NewsCategory");
 
                     b.Navigation("User");
+                });
 
-                    b.Navigation("UserNewsKeyword");
+            modelBuilder.Entity("NewsAggregationSystem.DAL.Entities.ReportedArticle", b =>
+                {
+                    b.HasOne("NewsAggregationSystem.DAL.Entities.Article", "Article")
+                        .WithMany("ReportedArticles")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NewsAggregationSystem.DAL.Entities.User", "User")
+                        .WithMany("ReportedArticles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("NewsAggregationSystem.DAL.Entities.SavedArticle", b =>
                 {
                     b.HasOne("NewsAggregationSystem.DAL.Entities.Article", "Article")
-                        .WithMany()
+                        .WithMany("SavedArticles")
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -640,6 +807,25 @@ namespace NewsAggregationSystem.Migrations.Migrations
                         .IsRequired();
 
                     b.Navigation("Article");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NewsAggregationSystem.DAL.Entities.UserNewsKeyword", b =>
+                {
+                    b.HasOne("NewsAggregationSystem.DAL.Entities.NewsCategory", "NewsCategory")
+                        .WithMany()
+                        .HasForeignKey("NewsCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NewsAggregationSystem.DAL.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NewsCategory");
 
                     b.Navigation("User");
                 });
@@ -663,6 +849,15 @@ namespace NewsAggregationSystem.Migrations.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("NewsAggregationSystem.DAL.Entities.Article", b =>
+                {
+                    b.Navigation("ArticleReactions");
+
+                    b.Navigation("ReportedArticles");
+
+                    b.Navigation("SavedArticles");
+                });
+
             modelBuilder.Entity("NewsAggregationSystem.DAL.Entities.User", b =>
                 {
                     b.Navigation("NotificationPreferences");
@@ -670,6 +865,8 @@ namespace NewsAggregationSystem.Migrations.Migrations
                     b.Navigation("Notifications");
 
                     b.Navigation("ReactedArticles");
+
+                    b.Navigation("ReportedArticles");
 
                     b.Navigation("SavedArticles");
 

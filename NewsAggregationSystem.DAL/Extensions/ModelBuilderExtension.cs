@@ -56,8 +56,25 @@ namespace NewsAggregationSystem.DAL.Extensions
                     RoleId = (int)Common.Enums.UserRoles.Admin,
                     CreatedDate = new DateTime(2025, 6, 18, 0, 0, 0),
                     CreatedById = ApplicationConstants.SystemUserId
-                }
-            );
+                });
+
+            modelBuilder.Entity<Reaction>().HasData(
+                new Reaction
+                {
+                    Id = 1,
+                    Name = "Like",
+                    CreatedDate = new DateTime(2025, 6, 18, 0, 0, 0),
+                    CreatedById = ApplicationConstants.SystemUserId
+                });
+
+            modelBuilder.Entity<Reaction>().HasData(
+                new Reaction
+                {
+                    Id = 2,
+                    Name = "Dislike",
+                    CreatedDate = new DateTime(2025, 6, 18, 0, 0, 0),
+                    CreatedById = ApplicationConstants.SystemUserId
+                });
         }
     }
 }

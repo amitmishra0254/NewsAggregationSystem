@@ -11,5 +11,11 @@ namespace NewsAggregationSystem.DAL.Repositories.NewsSources
         {
             this.context = context;
         }
+
+        public async Task<int> ChangeNewsSourceStatus(bool newsSourceStatus, NewsSource newsSource)
+        {
+            newsSource.IsActive = newsSourceStatus;
+            return await UpdateAsync(newsSource);
+        }
     }
 }
