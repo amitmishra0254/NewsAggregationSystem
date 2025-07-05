@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using NewsAggregationSystem.Common.Constants;
 using NewsAggregationSystem.Common.DTOs.NewsArticles;
@@ -93,31 +92,32 @@ namespace NewsAggregationSystem.Service.Services
 
         public async Task<ArticleDTO> GetArticleById(int Id, int userId)
         {
-            var article = await articleRepository.GetWhere(article => article.Id == Id)
-                            .Include(article => article.NewsCategory)
-                            .ProjectTo<ArticleDTO>(mapper.ConfigurationProvider)
-                            .FirstOrDefaultAsync();
+            var article = await articleRepository.GetArticleById(Id, userId);
 
-            if (article != null)
+            if (article == null)
+                throw new NotFoundException($"Article with ID {Id} not found.");
+
+            var articleReadHistory = new ArticleReadHistory
             {
-                var articleReadHistory = new ArticleReadHistory
-                {
-                    ArticleId = Id,
-                    UserId = userId,
-                    CreatedById = userId,
-                    CreatedDate = dateTimeHelper.CurrentUtcDateTime
-                };
+                ArticleId = Id,
+                UserId = userId,
+                CreatedById = userId,
+                CreatedDate = dateTimeHelper.CurrentUtcDateTime
+            };
 
-                await articleReadHistoryRepository.AddAsync(articleReadHistory);
-            }
-            return article;
+            await articleReadHistoryRepository.AddAsync(articleReadHistory);
+            return mapper.Map<ArticleDTO>(article);
         }
 
         public async Task<int> HideArticle(int articleId)
         {
-            var article = await articleRepository.GetWhere(article => article.Id == articleId).FirstAsync();
-            article.IsHidden = true;
-            return await articleRepository.UpdateAsync(article);
+            var article = await articleRepository.GetWhere(article => article.Id == articleId).FirstOrDefaultAsync();
+            if (article != null)
+            {
+                article.IsHidden = true;
+                return await articleRepository.UpdateAsync(article);
+            }
+            throw new NotFoundException(string.Format(ApplicationConstants.ArticleNotFoundWithThisId, articleId));
         }
 
         public async Task<int> DeleteSavedArticles(int articleId, int userId)
@@ -369,7 +369,7 @@ namespace NewsAggregationSystem.Service.Services
             return articles;
         }
 
-        private async Task<List<Article>> GetArticlesByCategory(int categoryId, List<NotificationPreferenceDTO> notificationPreferences, List<Article> articles)
+        protected virtual async Task<List<Article>> GetArticlesByCategory(int categoryId, List<NotificationPreferenceDTO> notificationPreferences, List<Article> articles)
         {
             var filteredArticles = articles
                 .Where(a => !a.IsHidden && a.NewsCategoryId == categoryId)

@@ -1,0 +1,26 @@
+{
+  "Id": 1,
+  "Title": "The Future of AI: Trends in 2025",
+  "Description": "An in-depth look into the emerging trends shaping the future of artificial intelligence.",
+  "Url": "https://news.example.com/ai-future-2025",
+  "ImageUrl": "https://news.example.com/images/ai-2025.jpg",
+  "PublishedAt": "2025-07-05T08:30:00Z",
+  "SourceName": "Tech Daily",
+  "Author": "Jane Smith",
+  "Content": "Artificial intelligence continues to revolutionize industries...",
+  "IsHidden": false,
+  "NewsCategoryId": 3,
+  "CreatedDate": "2025-07-01T09:15:00Z",
+  "ModifiedDate": null,
+  "CreatedById": 101,
+  "ModifiedById": null,
+  "NewsCategory": {
+    "Id": 3,
+    "Name": "Technology",
+    "IsHidden": false
+  },
+  "ArticleReactions": [],
+  "ReportedArticles": [],
+  "SavedArticles": [],
+  "ArticleReadHistory": []
+}
