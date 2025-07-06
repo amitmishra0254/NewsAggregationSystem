@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Moq;
 
-namespace NewsAggregationSystem.Tests
+namespace NewsAggregationSystem.Service.Tests.Utilities
 {
 
     public static class MockQueryableExtensions

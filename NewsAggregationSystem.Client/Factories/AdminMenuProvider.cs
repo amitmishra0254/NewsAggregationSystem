@@ -170,6 +170,7 @@ namespace NewsAggregationSystem.Client.Factories
             table.AddColumn("Name");
             table.AddColumn("API Key");
             table.AddColumn("Active");
+            table.AddColumn("Last Access");
 
             foreach (var server in servers)
             {
@@ -177,7 +178,8 @@ namespace NewsAggregationSystem.Client.Factories
                     server.Id.ToString(),
                     server.Name,
                     server.ApiKey,
-                    server.IsActive ? "[green]Yes[/]" : "[red]No[/]"
+                    server.IsActive ? "[green]Yes[/]" : "[red]No[/]",
+                    server.LastAccess.ToShortTimeString()
                 );
             }
 
@@ -200,13 +202,15 @@ namespace NewsAggregationSystem.Client.Factories
             table.AddColumn("[bold yellow]ID[/]");
             table.AddColumn("[bold yellow]Name[/]");
             table.AddColumn("[bold yellow]Active[/]");
+            table.AddColumn("[bold yellow]Last Access");
 
             foreach (var server in servers)
             {
                 table.AddRow(
                     server.Id.ToString(),
                     server.Name,
-                    server.IsActive ? "[green]Yes[/]" : "[red]No[/]"
+                    server.IsActive ? "[green]Yes[/]" : "[red]No[/]",
+                    server.LastAccess.ToShortTimeString()
                 );
             }
 

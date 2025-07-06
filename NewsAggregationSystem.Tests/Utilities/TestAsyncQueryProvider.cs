@@ -1,15 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
-namespace NewsAggregationSystem.Tests
+namespace NewsAggregationSystem.Service.Tests.Utilities
 {
     public class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
     {
-        private readonly IQueryProvider _inner;
+        private readonly IQueryProvider inner;
 
         public TestAsyncQueryProvider(IQueryProvider inner)
         {
-            _inner = inner;
+            this.inner = inner;
         }
 
         public IQueryable CreateQuery(Expression expression)
@@ -24,12 +24,12 @@ namespace NewsAggregationSystem.Tests
 
         public object? Execute(Expression expression)
         {
-            return _inner.Execute(expression);
+            return inner.Execute(expression);
         }
 
         public TResult Execute<TResult>(Expression expression)
         {
-            return _inner.Execute<TResult>(expression);
+            return inner.Execute<TResult>(expression);
         }
 
         public TResult ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken = default)

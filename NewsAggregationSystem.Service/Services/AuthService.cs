@@ -87,7 +87,7 @@ namespace NewsAggregationSystem.Service.Services
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("Jwt:key").Value));
 
-            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
                 claims: claims,

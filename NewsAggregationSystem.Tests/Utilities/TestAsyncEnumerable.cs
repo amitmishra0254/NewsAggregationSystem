@@ -1,7 +1,6 @@
-﻿using MockQueryable.EntityFrameworkCore;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
-namespace NewsAggregationSystem.Tests
+namespace NewsAggregationSystem.Service.Tests.Utilities
 {
 
     public class TestAsyncEnumerable<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQueryable<T>

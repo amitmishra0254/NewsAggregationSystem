@@ -1,4 +1,4 @@
-﻿namespace NewsAggregationSystem.Tests
+﻿namespace NewsAggregationSystem.Service.Tests.Utilities
 {
     public class TestAsyncEnumerator<T> : IAsyncEnumerator<T>
     {

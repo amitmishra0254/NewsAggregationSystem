@@ -179,22 +179,5 @@ namespace NewsAggregationSystem.Service.Services
             existingPreference.IsEnabled = isEnable;
             return await notificationPreferenceRepository.UpdateAsync(existingPreference);
         }
-
-
-        /*public async Task<int> UpdateNotificationConfigurations(List<NotificationConfigurationResponseDTO> notificationConfigurations)
-        {
-            var notificationConfigurations = await notificationPreferenceRepository.GetWhere(notificationConfiguration => notificationConfiguration.UserId == userId)
-                .Include(notificationConfiguration => notificationConfiguration.NewsCategory)
-                .Include(notificationConfiguration => notificationConfiguration.UserNewsKeyword)
-                .GroupBy(notificationConfiguration => notificationConfiguration.NewsCategory.Name)
-                .Select(group => new NotificationConfigurationResponseDTO
-                {
-                    Category = group.Key,
-                    Keywords = string.Join("|", group.Select(p => p.UserNewsKeyword.Name)),
-                    IsEnabled = group.First().IsEnabled
-                }).ToListAsync();
-
-            return notificationConfigurations;
-        }*/
     }
 }

@@ -4,15 +4,17 @@ using Moq.Protected;
 using NewsAggregationSystem.Common.DTOs.NewsArticles;
 using NewsAggregationSystem.Common.DTOs.NewsCategories;
 using NewsAggregationSystem.Common.DTOs.NotificationPreferences;
+using NewsAggregationSystem.Common.Enums;
 using NewsAggregationSystem.Common.Exceptions;
 using NewsAggregationSystem.DAL.Entities;
 using NewsAggregationSystem.DAL.Repositories.Articles;
 using NewsAggregationSystem.DAL.Repositories.Generic;
 using NewsAggregationSystem.Service.Interfaces;
 using NewsAggregationSystem.Service.Services;
+using NewsAggregationSystem.Service.Tests.Utilities;
 using System.Linq.Expressions;
 
-namespace NewsAggregationSystem.Tests
+namespace NewsAggregationSystem.Service.Tests.Services
 {
     [TestFixture]
     public class ArticleServiceTests
@@ -1194,6 +1196,559 @@ namespace NewsAggregationSystem.Tests
             Assert.AreEqual(0, result.Count);
         }
 
+        [Test]
+        public async Task ReactArticle_WhenExistingReactionExists_UpdatesReaction()
+        {
+            int articleId = 1;
+            int userId = 123;
+            int oldReactionId = 1;
+            int newReactionId = 2;
+
+            var articleList = new List<Article>
+            {
+                new Article { Id = articleId }
+            }.AsQueryable().BuildMockDbSet();
+
+            mockArticleRepository
+                .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<Article, bool>>>()))
+                .Returns(articleList.Object);
+
+            var existingReaction = new ArticleReaction
+            {
+                ArticleId = articleId,
+                UserId = userId,
+                ReactionId = oldReactionId
+            };
+
+            var reactionList = new List<ArticleReaction> { existingReaction }.AsQueryable().BuildMockDbSet();
+
+            mockArticleReactionRepository
+                .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<ArticleReaction, bool>>>()))
+                .Returns(reactionList.Object);
+
+            mockArticleReactionRepository
+                .Setup(repo => repo.UpdateAsync(It.IsAny<ArticleReaction>()))
+                .ReturnsAsync(1);
+
+            var result = await articleService.ReactArticle(articleId, userId, newReactionId);
+
+            Assert.AreEqual(1, result);
+
+            mockArticleReactionRepository.Verify(repo => repo.UpdateAsync(It.Is<ArticleReaction>(r =>
+                r.ArticleId == articleId &&
+                r.UserId == userId &&
+                r.ReactionId == newReactionId
+            )), Times.Once);
+
+            mockArticleReactionRepository.Verify(repo => repo.AddAsync(It.IsAny<ArticleReaction>()), Times.Never);
+        }
+
+        [Test]
+        public async Task ReactArticle_WhenExistingReactionHasSameReactionId_ReturnsZero()
+        {
+            int articleId = 1;
+            int userId = 123;
+            int reactionId = 1;
+
+            var articleList = new List<Article>
+            {
+                new Article { Id = articleId }
+            }.AsQueryable().BuildMockDbSet();
+
+            mockArticleRepository
+                .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<Article, bool>>>()))
+                .Returns(articleList.Object);
+
+            var existingReaction = new ArticleReaction
+            {
+                ArticleId = articleId,
+                UserId = userId,
+                ReactionId = reactionId
+            };
+
+            var reactionList = new List<ArticleReaction> { existingReaction }.AsQueryable().BuildMockDbSet();
+
+            mockArticleReactionRepository
+                .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<ArticleReaction, bool>>>()))
+                .Returns(reactionList.Object);
+
+            var result = await articleService.ReactArticle(articleId, userId, reactionId);
+
+            Assert.AreEqual(0, result);
+
+            mockArticleReactionRepository.Verify(repo => repo.UpdateAsync(It.IsAny<ArticleReaction>()), Times.Never);
+            mockArticleReactionRepository.Verify(repo => repo.AddAsync(It.IsAny<ArticleReaction>()), Times.Never);
+        }
+
+        [Test]
+        public async Task GetAllArticles_WhenCategoryIdProvided_FiltersAndRecommendsByCategory()
+        {
+            var userId = 123;
+            var categoryId = 10;
+            var request = new NewsArticleRequestDTO
+            {
+                CategoryId = categoryId
+            };
+
+            var articles = new List<Article>
+            {
+                new Article
+                {
+                    Id = 1,
+                    Title = "Category Article",
+                    NewsCategoryId = categoryId,
+                    IsHidden = false,
+                    NewsCategory = new NewsCategory { Id = categoryId, IsHidden = false },
+                    ArticleReactions = new List<ArticleReaction>(),
+                    SavedArticles = new List<SavedArticle>(),
+                    ReportedArticles = new List<ReportedArticle>(),
+                    ArticleReadHistory = new List<ArticleReadHistory>()
+                },
+                new Article
+                {
+                    Id = 2,
+                    Title = "Other Category Article",
+                    NewsCategoryId = 20,
+                    IsHidden = false,
+                    NewsCategory = new NewsCategory { Id = 20, IsHidden = false },
+                    ArticleReactions = new List<ArticleReaction>(),
+                    SavedArticles = new List<SavedArticle>(),
+                    ReportedArticles = new List<ReportedArticle>(),
+                    ArticleReadHistory = new List<ArticleReadHistory>()
+                }
+            };
+
+            var hiddenKeywords = new List<HiddenArticleKeyword>();
+
+            var notificationPreferences = new List<NotificationPreferenceDTO>
+            {
+                new NotificationPreferenceDTO
+                {
+                    UserId = userId,
+                    NewsCategories = new List<NewsCategoryDTO>
+                    {
+                        new NewsCategoryDTO
+                        {
+                            CategoryId = categoryId,
+                            IsEnabled = true,
+                            Keywords = new List<NotificationPreferencesKeywordDTO>()
+                        }
+                    }
+                }
+            };
+
+            mockArticleRepository
+                .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<Article, bool>>>()))
+                .Returns(articles.AsQueryable().BuildMockDbSet().Object);
+
+            mockHiddenArticleKeywordRepository
+                .Setup(repo => repo.GetAll())
+                .Returns(hiddenKeywords.AsQueryable().BuildMockDbSet().Object);
+
+            mockNotificationPreferenceService
+                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .ReturnsAsync(notificationPreferences);
+
+            mockArticleRepository
+                .Setup(x => x.GetMostLikedCategory(userId))
+                .ReturnsAsync((CategoryRecommendationDTO)null!);
+
+            mockArticleRepository
+                .Setup(x => x.GetMostSavedCategory(userId))
+                .ReturnsAsync((CategoryRecommendationDTO)null!);
+
+            mockArticleRepository
+                .Setup(x => x.GetMostReadCategory(userId))
+                .ReturnsAsync((CategoryRecommendationDTO)null!);
+
+            mockMapper
+                .Setup(m => m.Map<List<ArticleDTO>>(It.IsAny<List<Article>>()))
+                .Returns((List<Article> input) => input.Select(a => new ArticleDTO { Id = a.Id, Title = a.Title }).ToList());
+
+            var result = await articleService.GetAllArticles(request, userId);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual(1, result[0].Id);
+        }
+
+        [Test]
+        public async Task GetAllArticles_WhenCategoryIdIsAll_ReturnsAllArticles()
+        {
+            var userId = 123;
+            var request = new NewsArticleRequestDTO
+            {
+                CategoryId = (int)CategoryType.All
+            };
+
+            var articles = new List<Article>
+            {
+                new Article
+                {
+                    Id = 1,
+                    Title = "Article 1",
+                    IsHidden = false,
+                    NewsCategory = new NewsCategory { Id = 3, Name = "Sport", IsHidden = false },
+                    ArticleReactions = new List<ArticleReaction>(),
+                    SavedArticles = new List<SavedArticle>(),
+                    ReportedArticles = new List<ReportedArticle>()
+                },
+                new Article
+                {
+                    Id = 2,
+                    Title = "Article 2",
+                    IsHidden = false,
+                    NewsCategory = new NewsCategory { Id = 3, Name = "Sport", IsHidden = false },
+                    ArticleReactions = new List<ArticleReaction>(),
+                    SavedArticles = new List<SavedArticle>(),
+                    ReportedArticles = new List<ReportedArticle>()
+                }
+            };
+
+            var hiddenKeywords = new List<HiddenArticleKeyword>();
+
+            var notificationPreferences = new List<NotificationPreferenceDTO>
+            {
+                new NotificationPreferenceDTO
+                {
+                    UserId = userId,
+                    NewsCategories = new List<NewsCategoryDTO> { new NewsCategoryDTO { CategoryId = 3, IsEnabled = true, Keywords = [] } }
+                }
+            };
+
+            mockArticleRepository
+                .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<Article, bool>>>()))
+                .Returns(articles.AsQueryable().BuildMockDbSet().Object);
+
+            mockHiddenArticleKeywordRepository
+                .Setup(repo => repo.GetAll())
+                .Returns(hiddenKeywords.AsQueryable().BuildMockDbSet().Object);
+
+            mockNotificationPreferenceService
+                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .ReturnsAsync(notificationPreferences);
+
+            mockArticleRepository
+                .Setup(x => x.GetMostLikedCategory(userId))
+                .ReturnsAsync((CategoryRecommendationDTO)null!);
+
+            mockArticleRepository
+                .Setup(x => x.GetMostSavedCategory(userId))
+                .ReturnsAsync((CategoryRecommendationDTO)null!);
+
+            mockArticleRepository
+                .Setup(x => x.GetMostReadCategory(userId))
+                .ReturnsAsync((CategoryRecommendationDTO)null!);
+
+            mockMapper
+                .Setup(m => m.Map<List<ArticleDTO>>(It.IsAny<List<Article>>()))
+                .Returns((List<Article> input) => input.Select(a => new ArticleDTO { Id = a.Id, Title = a.Title }).ToList());
+
+            var result = await articleService.GetAllArticles(request, userId);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [Test]
+        public async Task GetAllArticles_WhenCategoryIdProvidedWithKeywords_PrioritizesByKeywordMatch()
+        {
+            var userId = 123;
+            var categoryId = 10;
+            var request = new NewsArticleRequestDTO
+            {
+                CategoryId = categoryId
+            };
+
+            var articles = new List<Article>
+            {
+                new Article
+                {
+                    Id = 1,
+                    Title = "Article about AI",
+                    Description = "AI technology",
+                    Content = "Artificial Intelligence",
+                    NewsCategoryId = categoryId,
+                    IsHidden = false,
+                    NewsCategory = new NewsCategory { Id = categoryId, IsHidden = false },
+                    ArticleReactions = new List<ArticleReaction>(),
+                    SavedArticles = new List<SavedArticle>(),
+                    ReportedArticles = new List<ReportedArticle>(),
+                    ArticleReadHistory = new List<ArticleReadHistory>()
+                },
+                new Article
+                {
+                    Id = 2,
+                    Title = "Article about Technology",
+                    Description = "Tech news",
+                    Content = "Technology updates",
+                    NewsCategoryId = categoryId,
+                    IsHidden = false,
+                    NewsCategory = new NewsCategory { Id = categoryId, IsHidden = false },
+                    ArticleReactions = new List<ArticleReaction>(),
+                    SavedArticles = new List<SavedArticle>(),
+                    ReportedArticles = new List<ReportedArticle>(),
+                    ArticleReadHistory = new List<ArticleReadHistory>()
+                }
+            };
+
+            var hiddenKeywords = new List<HiddenArticleKeyword>();
+
+            var notificationPreferences = new List<NotificationPreferenceDTO>
+            {
+                new NotificationPreferenceDTO
+                {
+                    UserId = userId,
+                    NewsCategories = new List<NewsCategoryDTO>
+                    {
+                        new NewsCategoryDTO
+                        {
+                            CategoryId = categoryId,
+                            IsEnabled = true,
+                            Keywords = new List<NotificationPreferencesKeywordDTO>
+                            {
+                                new NotificationPreferencesKeywordDTO { Name = "AI", IsEnabled = true },
+                                new NotificationPreferencesKeywordDTO { Name = "Technology", IsEnabled = true }
+                            }
+                        }
+                    }
+                }
+            };
+
+            mockArticleRepository
+                .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<Article, bool>>>()))
+                .Returns(articles.AsQueryable().BuildMockDbSet().Object);
+
+            mockHiddenArticleKeywordRepository
+                .Setup(repo => repo.GetAll())
+                .Returns(hiddenKeywords.AsQueryable().BuildMockDbSet().Object);
+
+            mockNotificationPreferenceService
+                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .ReturnsAsync(notificationPreferences);
+
+            mockArticleRepository
+                .Setup(x => x.GetMostLikedCategory(userId))
+                .ReturnsAsync((CategoryRecommendationDTO)null!);
+
+            mockArticleRepository
+                .Setup(x => x.GetMostSavedCategory(userId))
+                .ReturnsAsync((CategoryRecommendationDTO)null!);
+
+            mockArticleRepository
+                .Setup(x => x.GetMostReadCategory(userId))
+                .ReturnsAsync((CategoryRecommendationDTO)null!);
+
+            mockMapper
+                .Setup(m => m.Map<List<ArticleDTO>>(It.IsAny<List<Article>>()))
+                .Returns((List<Article> input) => input.Select(a => new ArticleDTO { Id = a.Id, Title = a.Title }).ToList());
+
+            var result = await articleService.GetAllArticles(request, userId);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [Test]
+        public async Task AddIfNotNull_WhenCategoryRecommendationIsNotNull_AddsToRecommendations()
+        {
+            var userId = 123;
+            var categoryRecommendation = new CategoryRecommendationDTO { CategoryId = 10, Count = 5 };
+            var categoryRecommendations = new List<CategoryRecommendationDTO>();
+
+            var task = Task.FromResult(categoryRecommendation);
+
+            await articleService.AddIfNotNull(task, categoryRecommendations);
+
+            Assert.AreEqual(1, categoryRecommendations.Count);
+            Assert.AreEqual(10, categoryRecommendations[0].CategoryId);
+            Assert.AreEqual(5, categoryRecommendations[0].Count);
+        }
+
+        [Test]
+        public async Task AddIfNotNull_WhenCategoryRecommendationIsNull_DoesNotAddToRecommendations()
+        {
+            var userId = 123;
+            var categoryRecommendations = new List<CategoryRecommendationDTO>();
+
+            var task = Task.FromResult<CategoryRecommendationDTO>(null!);
+
+            await articleService.AddIfNotNull(task, categoryRecommendations);
+
+            Assert.AreEqual(0, categoryRecommendations.Count);
+        }
+
+        [Test]
+        public async Task GetRecommendedArticles_WhenNoRecommendationsExist_ReturnsEmptyList()
+        {
+            var userId = 123;
+            var articles = new List<Article>
+            {
+                new Article { Id = 1, Title = "Test Article" }
+            };
+
+            var notificationPreferences = new List<NotificationPreferenceDTO>
+            {
+                new NotificationPreferenceDTO
+                {
+                    UserId = userId,
+                    NewsCategories = new List<NewsCategoryDTO>()
+                }
+            };
+
+            mockArticleRepository.Setup(x => x.GetMostLikedCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
+            mockArticleRepository.Setup(x => x.GetMostSavedCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
+            mockArticleRepository.Setup(x => x.GetMostReadCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
+
+            mockNotificationPreferenceService
+                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .ReturnsAsync(notificationPreferences);
+
+            var result = await articleService.GetRecommendedArticles(userId, articles);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [Test]
+        public async Task GetRecommendedArticles_WhenRecommendationsExist_OrdersByCountDescending()
+        {
+            var userId = 123;
+            var articles = new List<Article>
+            {
+                new Article { Id = 1, NewsCategoryId = 10, Title = "Category 10 Article" },
+                new Article { Id = 2, NewsCategoryId = 20, Title = "Category 20 Article" }
+            };
+
+            var likedCategory = new CategoryRecommendationDTO { CategoryId = 10, Count = 3 };
+            var savedCategory = new CategoryRecommendationDTO { CategoryId = 20, Count = 5 };
+
+            var notificationPreferences = new List<NotificationPreferenceDTO>
+            {
+                new NotificationPreferenceDTO
+                {
+                    UserId = userId,
+                    NewsCategories = new List<NewsCategoryDTO>
+                    {
+                        new NewsCategoryDTO
+                        {
+                            CategoryId = 10,
+                            IsEnabled = true,
+                            Keywords = new List<NotificationPreferencesKeywordDTO>()
+                        },
+                        new NewsCategoryDTO
+                        {
+                            CategoryId = 20,
+                            IsEnabled = true,
+                            Keywords = new List<NotificationPreferencesKeywordDTO>()
+                        }
+                    }
+                }
+            };
+
+            mockArticleRepository.Setup(x => x.GetMostLikedCategory(userId)).ReturnsAsync(likedCategory);
+            mockArticleRepository.Setup(x => x.GetMostSavedCategory(userId)).ReturnsAsync(savedCategory);
+            mockArticleRepository.Setup(x => x.GetMostReadCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
+
+            mockNotificationPreferenceService
+                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .ReturnsAsync(notificationPreferences);
+
+            var result = await articleService.GetRecommendedArticles(userId, articles);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count);
+            Assert.AreEqual(2, result[0].Id);
+            Assert.AreEqual(1, result[1].Id);
+        }
+
+        [Test]
+        public async Task GetRecommendedArticles_WhenDuplicateCategoriesExist_RemovesDuplicates()
+        {
+            var userId = 123;
+            var articles = new List<Article>
+            {
+                new Article { Id = 1, NewsCategoryId = 10, Title = "Category 10 Article" }
+            };
+
+            var likedCategory = new CategoryRecommendationDTO { CategoryId = 10, Count = 5 };
+            var savedCategory = new CategoryRecommendationDTO { CategoryId = 10, Count = 3 };
+            var notificationPreferences = new List<NotificationPreferenceDTO>
+            {
+                new NotificationPreferenceDTO
+                {
+                    UserId = userId,
+                    NewsCategories = new List<NewsCategoryDTO>
+                    {
+                        new NewsCategoryDTO
+                        {
+                            CategoryId = 10,
+                            IsEnabled = true,
+                            Keywords = new List<NotificationPreferencesKeywordDTO>()
+                        }
+                    }
+                }
+            };
+
+            mockArticleRepository.Setup(x => x.GetMostLikedCategory(userId)).ReturnsAsync(likedCategory);
+            mockArticleRepository.Setup(x => x.GetMostSavedCategory(userId)).ReturnsAsync(savedCategory);
+            mockArticleRepository.Setup(x => x.GetMostReadCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
+
+            mockNotificationPreferenceService
+                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .ReturnsAsync(notificationPreferences);
+
+            var result = await articleService.GetRecommendedArticles(userId, articles);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+        }
+
+        [Test]
+        public async Task GetRecommendedArticles_WhenNotificationPreferencesHaveKeywords_AddsKeywordsToRecommendations()
+        {
+            var userId = 123;
+            var articles = new List<Article>
+            {
+                new Article { Id = 1, NewsCategoryId = 10, Title = "AI Article" }
+            };
+
+            var likedCategory = new CategoryRecommendationDTO { CategoryId = 10, Count = 5 };
+
+            var notificationPreferences = new List<NotificationPreferenceDTO>
+            {
+                new NotificationPreferenceDTO
+                {
+                    UserId = userId,
+                    NewsCategories = new List<NewsCategoryDTO>
+                    {
+                        new NewsCategoryDTO
+                        {
+                            CategoryId = 10,
+                            IsEnabled = true,
+                            Keywords = new List<NotificationPreferencesKeywordDTO>
+                            {
+                                new NotificationPreferencesKeywordDTO { Name = "AI", IsEnabled = true },
+                                new NotificationPreferencesKeywordDTO { Name = "Technology", IsEnabled = true }
+                            }
+                        }
+                    }
+                }
+            };
+
+            mockArticleRepository.Setup(x => x.GetMostLikedCategory(userId)).ReturnsAsync(likedCategory);
+            mockArticleRepository.Setup(x => x.GetMostSavedCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
+            mockArticleRepository.Setup(x => x.GetMostReadCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
+
+            mockNotificationPreferenceService
+                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .ReturnsAsync(notificationPreferences);
+
+            var result = await articleService.GetRecommendedArticles(userId, articles);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+        }
 
         #region Private Helper Methods
         private Article CreateVisibleArticle(int id)

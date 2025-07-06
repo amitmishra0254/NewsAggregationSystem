@@ -19,7 +19,7 @@ namespace NewsAggregationSystem.Service.Services
         {
             var hiddenArticleKeyword = new HiddenArticleKeyword
             {
-                Name = keyword.ToLower(),
+                Name = keyword?.ToLower(),
                 CreatedById = userId,
                 CreatedDate = dateTimeHelper.CurrentUtcDateTime
             };
