@@ -14,88 +14,137 @@ namespace NewsAggregationSystem.Client.Services
     public class NewsSourcesService : INewsSourcesService
     {
         private readonly HttpClient httpClient;
+
         public NewsSourcesService(HttpClient httpClient)
         {
             this.httpClient = httpClient;
         }
 
-        public async Task AddNewsSource(CreateNewsSourceDTO newsSource)
+        public async Task CreateNewsSourceAsync(CreateNewsSourceDTO newsSource)
         {
             try
             {
-                var json = JsonSerializer.Serialize(newsSource);
-                var content = new StringContent(json, Encoding.UTF8, ApplicationConstants.JsonContentType);
-                var request = new HttpRequestMessage(HttpMethod.Post, ApplicationConstants.AddNewsSource)
-                {
-                    Content = content
-                };
-
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
-
-                var response = await httpClient.SendAsync(request);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    AnsiConsole.MarkupLine("[bold green] External Server Created Successfully![/]");
-                    return;
-                }
-
-                AnsiConsole.MarkupLine($"[bold red] Add news source failed: {await response.Content.ReadAsStringAsync()}.[/]");
+                var response = await SendCreateNewsSourceRequestAsync(newsSource);
+                await HandleCreateNewsSourceResponseAsync(response);
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]Error adding news source: {ex.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.ErrorAddingNewsSource, ex.Message);
             }
         }
 
-        public async Task<List<NewsSourceDTO>> GetAllNewsSource()
+        public async Task<List<NewsSourceDTO>> GetAllNewsSourcesAsync()
         {
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
-
+                SetAuthorizationHeader();
                 var response = await httpClient.GetAsync(ApplicationConstants.AddNewsSource);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var newsSources = await response.Content.ReadFromJsonAsync<List<NewsSourceDTO>>();
-                    return newsSources;
-                }
-
-                AnsiConsole.MarkupLine($"[red]Get all news sources failed: {await response.Content.ReadAsStringAsync()}.[/]");
+                return await HandleGetAllNewsSourcesResponseAsync(response);
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]Error while fetching news sources: {ex.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.ErrorFetchingNewsSources, ex.Message);
+                return new List<NewsSourceDTO>();
             }
-            return null;
         }
 
-        public async Task UpdateNewsSource(int Id, UpdateNewsSourceDTO updateNewsSourceDTO)
+        public async Task UpdateNewsSourceAsync(int Id, UpdateNewsSourceDTO updateNewsSourceDTO)
         {
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
-
+                SetAuthorizationHeader();
                 var response = await httpClient.PutAsJsonAsync($"NewsSources/{Id}", updateNewsSourceDTO);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    AnsiConsole.MarkupLine("[green]External server updated successfully.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.NotFound)
-                {
-                    AnsiConsole.MarkupLine($"[green]External server with Id {Id} not found.[/]");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine($"[red]Failed to update. Status Code: {(int)response.StatusCode}[/]");
-                }
+                await HandleUpdateNewsSourceResponseAsync(response, Id);
             }
             catch (Exception exception)
             {
-                AnsiConsole.MarkupLine($"[bold red]Error updating news source: {exception.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.ErrorUpdatingNewsSource, exception.Message);
             }
+        }
+
+        private async Task<HttpResponseMessage> SendCreateNewsSourceRequestAsync(CreateNewsSourceDTO newsSource)
+        {
+            var json = JsonSerializer.Serialize(newsSource);
+            var content = CreateJsonContent(json);
+            var request = new HttpRequestMessage(HttpMethod.Post, ApplicationConstants.AddNewsSource)
+            {
+                Content = content
+            };
+
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
+            return await httpClient.SendAsync(request);
+        }
+
+        private StringContent CreateJsonContent(string json)
+        {
+            return new StringContent(json, Encoding.UTF8, ApplicationConstants.JsonContentType);
+        }
+
+        private void SetAuthorizationHeader()
+        {
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
+        }
+
+        private async Task HandleCreateNewsSourceResponseAsync(HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                DisplaySuccessMessage(ApplicationConstants.LogMessage.ExternalServerCreatedSuccessfully);
+                return;
+            }
+
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            DisplayErrorMessage(ApplicationConstants.LogMessage.AddNewsSourceFailed, errorMessage);
+        }
+
+        private async Task<List<NewsSourceDTO>> HandleGetAllNewsSourcesResponseAsync(HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                var newsSources = await response.Content.ReadFromJsonAsync<List<NewsSourceDTO>>();
+                return newsSources ?? new List<NewsSourceDTO>();
+            }
+
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            DisplayErrorMessage(ApplicationConstants.LogMessage.GetAllNewsSourcesFailed, errorMessage);
+            return new List<NewsSourceDTO>();
+        }
+
+        private async Task HandleUpdateNewsSourceResponseAsync(HttpResponseMessage response, int Id)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                DisplaySuccessMessage(ApplicationConstants.LogMessage.ExternalServerUpdatedSuccessfully);
+                return;
+            }
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.NotFound:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.ExternalServerNotFound, Id);
+                    break;
+                default:
+                    DisplayErrorMessage(ApplicationConstants.LogMessage.FailedToUpdateExternalServer, (int)response.StatusCode);
+                    break;
+            }
+        }
+
+        private void DisplaySuccessMessage(string message, params object[] args)
+        {
+            var formattedMessage = string.Format(message, args);
+            AnsiConsole.MarkupLine($"[bold green]{formattedMessage}[/]");
+        }
+
+        private void DisplayWarningMessage(string message, params object[] args)
+        {
+            var formattedMessage = string.Format(message, args);
+            AnsiConsole.MarkupLine($"[green]{formattedMessage}[/]");
+        }
+
+        private void DisplayErrorMessage(string message, params object[] args)
+        {
+            var formattedMessage = string.Format(message, args);
+            AnsiConsole.MarkupLine($"[red]{formattedMessage}[/]");
         }
     }
 }

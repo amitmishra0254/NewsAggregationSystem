@@ -12,111 +12,151 @@ namespace NewsAggregationSystem.Client.Services
     public class NewsCategoryService : INewsCategoryService
     {
         private readonly HttpClient httpClient;
-        private readonly JsonSerializerOptions options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
+        private readonly JsonSerializerOptions jsonOptions;
+
         public NewsCategoryService(HttpClient httpClient)
         {
             this.httpClient = httpClient;
+            this.jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         }
 
-        public async Task AddNewsCategory(string category)
+        public async Task CreateNewsCategoryAsync(string category)
         {
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
-
-                var response = await httpClient.PostAsync(
-                    $"{ApplicationConstants.AddNewsCategoryPath}?category={Uri.EscapeDataString(category)}", null);
-
-
-                if (response.IsSuccessStatusCode)
-                {
-                    AnsiConsole.MarkupLine("[green]News category added successfully.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.Conflict)
-                {
-                    AnsiConsole.MarkupLine("[yellow]News category already exists with this name.[/]");
-                }
-                else
-                {
-                    var error = await response.Content.ReadAsStringAsync();
-                    AnsiConsole.MarkupLine($"[red]Failed to add category. Status Code: {(int)response.StatusCode}[/]");
-                    AnsiConsole.WriteLine($"Message: {error}");
-                }
+                SetAuthorizationHeader();
+                var response = await SendCreateNewsCategoryRequestAsync(category);
+                await HandleCreateNewsCategoryResponseAsync(response);
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]Error while adding news category: {ex.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.ErrorAddingNewsCategory, ex.Message);
             }
         }
 
-
-        public async Task ToggleNewsCategoryVisibility(int categoryId, bool isHidden)
+        public async Task ToggleCategoryVisibilityAsync(int categoryId, bool isHidden)
         {
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
-
-                string url = $"NewsCategories/toggle-visibility?categoryId={categoryId}&IsHidden={isHidden}";
-
-                var response = await httpClient.PostAsync(url, null);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    AnsiConsole.MarkupLine($"[green]Category {(isHidden ? "hidden" : "unhidden")} successfully.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.BadRequest)
-                {
-                    AnsiConsole.MarkupLine("[yellow]Category visibility is already updated.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.NotFound)
-                {
-                    AnsiConsole.MarkupLine("[red]Category not found.[/]");
-                }
-                else
-                {
-                    var message = await response.Content.ReadAsStringAsync();
-                    AnsiConsole.MarkupLine($"[red]Failed to toggle category visibility. Status Code: {(int)response.StatusCode}[/]");
-                    AnsiConsole.WriteLine($"Message: {message}");
-                }
+                SetAuthorizationHeader();
+                var response = await SendToggleCategoryVisibilityRequestAsync(categoryId, isHidden);
+                await HandleToggleCategoryVisibilityResponseAsync(response, isHidden);
             }
             catch (Exception exception)
             {
-                AnsiConsole.MarkupLine($"[red]Error occurred: {exception.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.ErrorTogglingCategoryVisibility, exception.Message);
             }
         }
 
-        public async Task<List<NotificationPreferencesKeywordDTO>> GetAllNewsCategories()
+        public async Task<List<NotificationPreferencesKeywordDTO>> GetAllNewsCategoriesAsync()
         {
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
-
+                SetAuthorizationHeader();
                 var response = await httpClient.GetAsync("NewsCategories");
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var responseString = await response.Content.ReadAsStringAsync();
-                    var categories = JsonSerializer.Deserialize<List<NotificationPreferencesKeywordDTO>>(responseString, options);
-
-                    return categories;
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine($"[red]Failed to retrieve news categories. Status code: {(int)response.StatusCode}[/]");
-                }
+                return await HandleGetAllNewsCategoriesResponseAsync(response);
             }
             catch (Exception exception)
             {
-                AnsiConsole.MarkupLine($"[red]Error occurred while fetching categories: {exception.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.ErrorFetchingCategories, exception.Message);
+                return new List<NotificationPreferencesKeywordDTO>();
+            }
+        }
+
+        private void SetAuthorizationHeader()
+        {
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
+        }
+
+        private async Task<HttpResponseMessage> SendCreateNewsCategoryRequestAsync(string category)
+        {
+            var url = $"{ApplicationConstants.AddNewsCategoryPath}?category={Uri.EscapeDataString(category)}";
+            return await httpClient.PostAsync(url, null);
+        }
+
+        private async Task<HttpResponseMessage> SendToggleCategoryVisibilityRequestAsync(int categoryId, bool isHidden)
+        {
+            var url = $"NewsCategories/toggle-visibility?categoryId={categoryId}&IsHidden={isHidden}";
+            return await httpClient.PostAsync(url, null);
+        }
+
+        private async Task HandleCreateNewsCategoryResponseAsync(HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                DisplaySuccessMessage(ApplicationConstants.LogMessage.ClientNewsCategoryAddedSuccessfully);
+                return;
             }
 
-            return null;
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.Conflict:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.NewsCategoryAlreadyExists);
+                    break;
+                default:
+                    var error = await response.Content.ReadAsStringAsync();
+                    DisplayErrorMessage(ApplicationConstants.LogMessage.FailedToAddCategory, (int)response.StatusCode);
+                    DisplayErrorMessage($"Message: {error}");
+                    break;
+            }
+        }
+
+        private async Task HandleToggleCategoryVisibilityResponseAsync(HttpResponseMessage response, bool isHidden)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                var message = isHidden 
+                    ? ApplicationConstants.LogMessage.CategoryHiddenSuccessfully 
+                    : ApplicationConstants.LogMessage.CategoryUnhiddenSuccessfully;
+                DisplaySuccessMessage(message);
+                return;
+            }
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.BadRequest:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.CategoryVisibilityAlreadyUpdated);
+                    break;
+                case HttpStatusCode.NotFound:
+                    DisplayErrorMessage(ApplicationConstants.LogMessage.CategoryNotFound);
+                    break;
+                default:
+                    var message = await response.Content.ReadAsStringAsync();
+                    DisplayErrorMessage(ApplicationConstants.LogMessage.FailedToToggleCategoryVisibility, (int)response.StatusCode);
+                    DisplayErrorMessage($"Message: {message}");
+                    break;
+            }
+        }
+
+        private async Task<List<NotificationPreferencesKeywordDTO>> HandleGetAllNewsCategoriesResponseAsync(HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                var responseString = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<List<NotificationPreferencesKeywordDTO>>(responseString, jsonOptions) 
+                    ?? new List<NotificationPreferencesKeywordDTO>();
+            }
+
+            DisplayErrorMessage(ApplicationConstants.LogMessage.FailedToRetrieveNewsCategories, (int)response.StatusCode);
+            return new List<NotificationPreferencesKeywordDTO>();
+        }
+
+        private void DisplaySuccessMessage(string message, params object[] args)
+        {
+            var formattedMessage = string.Format(message, args);
+            AnsiConsole.MarkupLine($"[green]{formattedMessage}[/]");
+        }
+
+        private void DisplayWarningMessage(string message, params object[] args)
+        {
+            var formattedMessage = string.Format(message, args);
+            AnsiConsole.MarkupLine($"[yellow]{formattedMessage}[/]");
+        }
+
+        private void DisplayErrorMessage(string message, params object[] args)
+        {
+            var formattedMessage = string.Format(message, args);
+            AnsiConsole.MarkupLine($"[red]{formattedMessage}[/]");
         }
     }
 }

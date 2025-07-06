@@ -13,240 +13,261 @@ namespace NewsAggregationSystem.Client.Services
     public class ArticleService : IArticleService
     {
         private readonly HttpClient httpClient;
-        private readonly JsonSerializerOptions options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
+        private readonly JsonSerializerOptions jsonOptions;
 
         public ArticleService(HttpClient httpClient)
         {
             this.httpClient = httpClient;
+            this.jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         }
 
-        public async Task<List<ArticleDTO>> GetSavedArticles()
+        public async Task<List<ArticleDTO>> GetUserSavedArticlesAsync()
         {
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
+                SetAuthorizationHeader();
                 var response = await httpClient.GetAsync(ApplicationConstants.SavedArticlesPath);
-                if (response.IsSuccessStatusCode)
-                {
-                    var responseString = await response.Content.ReadAsStringAsync();
-                    var articles = JsonSerializer.Deserialize<List<ArticleDTO>>(responseString, options);
-                    return articles;
-                }
-                AnsiConsole.MarkupLine($"[red]Failed to retrieve saved articles. Status code: {(int)response.StatusCode}[/]");
+                return await HandleGetArticlesResponseAsync(response);
             }
             catch (Exception exception)
             {
-                AnsiConsole.MarkupLine($"[red]Error occurred while fetching saved articles: {exception.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.ErrorFetchingSavedArticles, exception.Message);
+                return new List<ArticleDTO>();
             }
-            return new();
         }
 
-        public async Task<List<ArticleDTO>> GetAllArticles(NewsArticleRequestDTO request)
+        public async Task<List<ArticleDTO>> GetUserArticlesAsync(NewsArticleRequestDTO request)
         {
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
-
-                string queryString = BuildQueryString(request);
-
-                string url = $"Articles{queryString}";
-
+                SetAuthorizationHeader();
+                var queryString = BuildQueryString(request);
+                var url = $"Articles{queryString}";
                 var response = await httpClient.GetAsync(url);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    return JsonSerializer.Deserialize<List<ArticleDTO>>(content, options);
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine($"[red]Failed to fetch articles. Status Code: {(int)response.StatusCode}[/]");
-                    var errorMessage = await response.Content.ReadAsStringAsync();
-                    AnsiConsole.WriteLine($"Message: {errorMessage}");
-                }
+                return await HandleGetArticlesResponseAsync(response);
             }
             catch (Exception exception)
             {
-                AnsiConsole.MarkupLine($"[red]Error occurred while fetching articles: {exception.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.ErrorFetchingArticles, exception.Message);
+                return new List<ArticleDTO>();
             }
-            return new();
         }
 
-        public async Task SaveArticle(int articleId)
+        public async Task SaveArticleAsync(int articleId)
         {
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
-
+                SetAuthorizationHeader();
                 var response = await httpClient.PostAsync($"Articles/save-article/{articleId}", null);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    AnsiConsole.MarkupLine($"[green]Article saved successfully.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.NotFound)
-                {
-                    AnsiConsole.MarkupLine($"[yellow]Article with ID {articleId} not found.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.BadRequest)
-                {
-                    AnsiConsole.MarkupLine("[yellow]Article is already saved.[/]");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine($"[red]Failed to save article. Status code: {(int)response.StatusCode}[/]");
-                }
+                await HandleSaveArticleResponseAsync(response, articleId);
             }
             catch (Exception exception)
             {
-                AnsiConsole.MarkupLine($"[red]Error occurred while saving article: {exception.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.ErrorSavingArticle, exception.Message);
             }
         }
 
-        public async Task ReactArticle(int articleId, int reactionId)
+        public async Task ReactToArticleAsync(int articleId, int reactionId)
         {
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
-
+                SetAuthorizationHeader();
                 var url = $"Articles/{articleId}/react-article{reactionId}";
                 var response = await httpClient.PostAsync(url, null);
-
-                string reactionName = Enum.IsDefined(typeof(ReactionType), reactionId)
-                    ? Enum.GetName(typeof(ReactionType), reactionId)
-                    : "Reacted";
-
-                if (response.IsSuccessStatusCode)
-                {
-                    AnsiConsole.MarkupLine($"[green]Article {reactionName} successfully.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.NotFound)
-                {
-                    AnsiConsole.MarkupLine($"[yellow]Article with ID {articleId} not found.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.BadRequest)
-                {
-                    AnsiConsole.MarkupLine("[yellow]You have already reacted to this article.[/]");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine($"[red]Failed to react to article. Status code: {(int)response.StatusCode}[/]");
-                }
+                await HandleReactToArticleResponseAsync(response, articleId, reactionId);
             }
             catch (Exception exception)
             {
-                AnsiConsole.MarkupLine($"[red]Error occurred while reacting to article: {exception.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.ErrorReactingToArticle, exception.Message);
             }
         }
 
-        public async Task DeleteSavedArticle(int articleId)
+        public async Task RemoveSavedArticleAsync(int articleId)
         {
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
-
+                SetAuthorizationHeader();
                 var response = await httpClient.DeleteAsync($"Articles/delete-saved-article/{articleId}");
-
-                if (response.IsSuccessStatusCode)
-                {
-                    AnsiConsole.MarkupLine("[green]Article removed from saved list successfully.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.NotFound)
-                {
-                    AnsiConsole.MarkupLine($"[yellow]Article with ID {articleId} not found.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.BadRequest)
-                {
-                    AnsiConsole.MarkupLine("[yellow]Article is not saved. Save it before trying to delete it.[/]");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine($"[red]Failed to delete saved article. Status code: {(int)response.StatusCode}[/]");
-                }
+                await HandleRemoveSavedArticleResponseAsync(response, articleId);
             }
             catch (Exception exception)
             {
-                AnsiConsole.MarkupLine($"[red]Error occurred while deleting saved article: {exception.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.ErrorDeletingSavedArticle, exception.Message);
             }
         }
 
-        public async Task ToggleArticleVisibility(int articleId, bool isHidden)
+        public async Task ToggleArticleVisibilityAsync(int articleId, bool isHidden)
         {
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
-
-                string url = $"Articles/change-status?articleId={articleId}&IsHidden={isHidden.ToString().ToLower()}";
-
+                SetAuthorizationHeader();
+                var url = $"Articles/change-status?articleId={articleId}&IsHidden={isHidden.ToString().ToLower()}";
                 var response = await httpClient.PostAsync(url, null);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    AnsiConsole.MarkupLine($"[green]Article ID {articleId} is now {(isHidden ? "hidden" : "visible")}.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.BadRequest)
-                {
-                    AnsiConsole.MarkupLine($"[yellow]Article is already {(isHidden ? "hidden" : "visible")}.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.NotFound)
-                {
-                    AnsiConsole.MarkupLine("[yellow]Article not found.[/]");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine($"[red]Failed to update article visibility. Status code: {(int)response.StatusCode}[/]");
-                }
+                await HandleToggleArticleVisibilityResponseAsync(response, articleId, isHidden);
             }
             catch (Exception exception)
             {
-                AnsiConsole.MarkupLine($"[red]Error occurred while toggling article visibility: {exception.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.ErrorTogglingArticleVisibility, exception.Message);
             }
         }
 
-        public async Task<ArticleDTO?> GetArticleById(int articleId)
+        public async Task<ArticleDTO?> GetArticleByIdAsync(int articleId)
         {
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
-
+                SetAuthorizationHeader();
                 var response = await httpClient.GetAsync($"Articles/{articleId}");
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var json = await response.Content.ReadAsStringAsync();
-                    return JsonSerializer.Deserialize<ArticleDTO>(json, options);
-                }
-
-                if (response.StatusCode == HttpStatusCode.NotFound)
-                {
-                    AnsiConsole.MarkupLine($"[yellow]Article with ID {articleId} not found.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    AnsiConsole.MarkupLine("[red]Unauthorized: Please login as a valid user.[/]");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine($"[red]Error: {response.StatusCode} - {response.ReasonPhrase}[/]");
-                }
+                return await HandleGetArticleByIdResponseAsync(response, articleId);
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]Error occurred while fetching the article: {ex.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.ErrorFetchingArticle, ex.Message);
+                return null;
             }
+        }
+
+        private void SetAuthorizationHeader()
+        {
+            httpClient.DefaultRequestHeaders.Authorization = 
+                new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
+        }
+
+        private async Task<List<ArticleDTO>> HandleGetArticlesResponseAsync(HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<List<ArticleDTO>>(content, jsonOptions) ?? new List<ArticleDTO>();
+            }
+
+            DisplayErrorMessage(ApplicationConstants.LogMessage.FailedToFetchArticles, (int)response.StatusCode);
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            DisplayErrorMessage($"Message: {errorMessage}");
+            return new List<ArticleDTO>();
+        }
+
+        private async Task HandleSaveArticleResponseAsync(HttpResponseMessage response, int articleId)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                DisplaySuccessMessage(ApplicationConstants.LogMessage.ClientArticleSavedSuccessfully);
+                return;
+            }
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.NotFound:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.ClientArticleNotFound, articleId);
+                    break;
+                case HttpStatusCode.BadRequest:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.ArticleAlreadySaved);
+                    break;
+                default:
+                    DisplayErrorMessage(ApplicationConstants.LogMessage.FailedToSaveArticle, (int)response.StatusCode);
+                    break;
+            }
+        }
+
+        private async Task HandleReactToArticleResponseAsync(HttpResponseMessage response, int articleId, int reactionId)
+        {
+            var reactionName = GetReactionName(reactionId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                DisplaySuccessMessage(ApplicationConstants.LogMessage.ClientArticleReactedSuccessfully, reactionName);
+                return;
+            }
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.NotFound:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.ClientArticleNotFound, articleId);
+                    break;
+                case HttpStatusCode.BadRequest:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.AlreadyReactedToArticle);
+                    break;
+                default:
+                    DisplayErrorMessage(ApplicationConstants.LogMessage.FailedToReactToArticle, (int)response.StatusCode);
+                    break;
+            }
+        }
+
+        private async Task HandleRemoveSavedArticleResponseAsync(HttpResponseMessage response, int articleId)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                DisplaySuccessMessage(ApplicationConstants.LogMessage.ArticleRemovedFromSaved);
+                return;
+            }
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.NotFound:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.ClientArticleNotFound, articleId);
+                    break;
+                case HttpStatusCode.BadRequest:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.ArticleNotSaved);
+                    break;
+                default:
+                    DisplayErrorMessage(ApplicationConstants.LogMessage.FailedToDeleteSavedArticle, (int)response.StatusCode);
+                    break;
+            }
+        }
+
+        private async Task HandleToggleArticleVisibilityResponseAsync(HttpResponseMessage response, int articleId, bool isHidden)
+        {
+            var visibility = isHidden ? "hidden" : "visible";
+
+            if (response.IsSuccessStatusCode)
+            {
+                DisplaySuccessMessage(ApplicationConstants.LogMessage.ArticleVisibilityUpdated, articleId, visibility);
+                return;
+            }
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.BadRequest:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.ArticleAlreadyInState, visibility);
+                    break;
+                case HttpStatusCode.NotFound:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.ClientArticleNotFound, articleId);
+                    break;
+                default:
+                    DisplayErrorMessage(ApplicationConstants.LogMessage.FailedToUpdateArticleVisibility, (int)response.StatusCode);
+                    break;
+            }
+        }
+
+        private async Task<ArticleDTO?> HandleGetArticleByIdResponseAsync(HttpResponseMessage response, int articleId)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ArticleDTO>(json, jsonOptions);
+            }
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.NotFound:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.ClientArticleNotFound, articleId);
+                    break;
+                case HttpStatusCode.Unauthorized:
+                    DisplayErrorMessage(ApplicationConstants.LogMessage.UnauthorizedAccess);
+                    break;
+                default:
+                    DisplayErrorMessage($"Error: {response.StatusCode} - {response.ReasonPhrase}");
+                    break;
+            }
+
             return null;
         }
 
+        private string GetReactionName(int reactionId)
+        {
+            return Enum.IsDefined(typeof(ReactionType), reactionId)
+                ? Enum.GetName(typeof(ReactionType), reactionId) ?? "Reacted"
+                : "Reacted";
+        }
 
         private string BuildQueryString(NewsArticleRequestDTO request)
         {
@@ -273,5 +294,22 @@ namespace NewsAggregationSystem.Client.Services
             return queryParams.Any() ? "?" + string.Join("&", queryParams) : string.Empty;
         }
 
+        private void DisplaySuccessMessage(string message, params object[] args)
+        {
+            var formattedMessage = string.Format(message, args);
+            AnsiConsole.MarkupLine($"[green]{formattedMessage}[/]");
+        }
+
+        private void DisplayWarningMessage(string message, params object[] args)
+        {
+            var formattedMessage = string.Format(message, args);
+            AnsiConsole.MarkupLine($"[yellow]{formattedMessage}[/]");
+        }
+
+        private void DisplayErrorMessage(string message, params object[] args)
+        {
+            var formattedMessage = string.Format(message, args);
+            AnsiConsole.MarkupLine($"[red]{formattedMessage}[/]");
+        }
     }
 }

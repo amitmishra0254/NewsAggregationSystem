@@ -12,80 +12,139 @@ namespace NewsAggregationSystem.Client.Services
     public class AuthService : IAuthService
     {
         private readonly HttpClient httpClient;
+        private readonly JsonSerializerOptions jsonOptions;
 
         public AuthService(HttpClient httpClient)
         {
             this.httpClient = httpClient;
+            this.jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         }
 
-        public async Task<AuthResponseDTO?> Login(LoginRequestForClientDTO request)
+        public async Task<AuthResponseDTO?> AuthenticateUserAsync(LoginRequestForClientDTO request)
         {
             try
             {
-                var json = JsonSerializer.Serialize(request);
-                var content = new StringContent(json, Encoding.UTF8, ApplicationConstants.JsonContentType);
-
-                var response = await httpClient.PostAsync(ApplicationConstants.LoginPath, content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var responseStream = await response.Content.ReadAsStreamAsync();
-                    return await JsonSerializer.DeserializeAsync<AuthResponseDTO>(responseStream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                }
-                else if (response.StatusCode == HttpStatusCode.BadRequest)
-                {
-                    AnsiConsole.MarkupLine("[yellow]Invalid email or password format.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    AnsiConsole.MarkupLine("[red]Incorrect email or password.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.NotFound)
-                {
-                    AnsiConsole.MarkupLine("[yellow]No account found with the provided email.[/]");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine($"[red]Login failed. Status: {(int)response.StatusCode} - {response.ReasonPhrase}[/]");
-                }
+                var response = await SendAuthenticationRequestAsync(request);
+                return await HandleAuthenticationResponseAsync(response);
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]Login error: {ex.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.LoginError, ex.Message);
+                return null;
             }
-            return null;
         }
 
-        public async Task Signup(UserRequestDTO request)
+        public async Task RegisterUserAsync(UserRequestDTO request)
         {
             try
             {
-                var json = JsonSerializer.Serialize(request);
-                var content = new StringContent(json, Encoding.UTF8, ApplicationConstants.JsonContentType);
-
-                var response = await httpClient.PostAsync(ApplicationConstants.SignupPath, content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    AnsiConsole.MarkupLine("[bold green]Account Created Successfully.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.BadRequest)
-                {
-                    AnsiConsole.MarkupLine("[yellow]Invalid input. Please check the details you entered.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.Conflict)
-                {
-                    AnsiConsole.MarkupLine("[yellow]An account with this email already exists.[/]");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine($"[red]Signup failed. Status: {(int)response.StatusCode} - {response.ReasonPhrase}[/]");
-                }
+                var response = await SendRegistrationRequestAsync(request);
+                await HandleRegistrationResponseAsync(response);
             }
             catch (Exception exception)
             {
-                AnsiConsole.MarkupLine($"[red]Signup error: {exception.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.SignupError, exception.Message);
             }
+        }
+
+        private async Task<HttpResponseMessage> SendAuthenticationRequestAsync(LoginRequestForClientDTO request)
+        {
+            var json = JsonSerializer.Serialize(request);
+            var content = CreateJsonContent(json);
+            return await httpClient.PostAsync(ApplicationConstants.LoginPath, content);
+        }
+
+        private async Task<HttpResponseMessage> SendRegistrationRequestAsync(UserRequestDTO request)
+        {
+            var json = JsonSerializer.Serialize(request);
+            var content = CreateJsonContent(json);
+            return await httpClient.PostAsync(ApplicationConstants.SignupPath, content);
+        }
+
+        private StringContent CreateJsonContent(string json)
+        {
+            return new StringContent(json, Encoding.UTF8, ApplicationConstants.JsonContentType);
+        }
+
+        private async Task<AuthResponseDTO?> HandleAuthenticationResponseAsync(HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                return await DeserializeAuthResponseAsync(response);
+            }
+
+            HandleAuthenticationErrorResponse(response);
+            return null;
+        }
+
+        private async Task HandleRegistrationResponseAsync(HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                DisplaySuccessMessage(ApplicationConstants.LogMessage.AccountCreatedSuccessfully);
+                return;
+            }
+
+            HandleRegistrationErrorResponse(response);
+        }
+
+        private async Task<AuthResponseDTO?> DeserializeAuthResponseAsync(HttpResponseMessage response)
+        {
+            var responseStream = await response.Content.ReadAsStreamAsync();
+            return await JsonSerializer.DeserializeAsync<AuthResponseDTO>(responseStream, jsonOptions);
+        }
+
+        private void HandleAuthenticationErrorResponse(HttpResponseMessage response)
+        {
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.BadRequest:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.InvalidEmailPasswordFormat);
+                    break;
+                case HttpStatusCode.Unauthorized:
+                    DisplayErrorMessage(ApplicationConstants.LogMessage.IncorrectEmailPassword);
+                    break;
+                case HttpStatusCode.NotFound:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.NoAccountFound);
+                    break;
+                default:
+                    DisplayErrorMessage(ApplicationConstants.LogMessage.LoginFailed, 
+                        (int)response.StatusCode, response.ReasonPhrase);
+                    break;
+            }
+        }
+
+        private void HandleRegistrationErrorResponse(HttpResponseMessage response)
+        {
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.BadRequest:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.InvalidInputDetails);
+                    break;
+                case HttpStatusCode.Conflict:
+                    DisplayWarningMessage(ApplicationConstants.LogMessage.AccountAlreadyExists);
+                    break;
+                default:
+                    DisplayErrorMessage(ApplicationConstants.LogMessage.SignupFailed, 
+                        (int)response.StatusCode, response.ReasonPhrase);
+                    break;
+            }
+        }
+
+        private void DisplaySuccessMessage(string message)
+        {
+            AnsiConsole.MarkupLine($"[bold green]{message}[/]");
+        }
+
+        private void DisplayWarningMessage(string message)
+        {
+            AnsiConsole.MarkupLine($"[yellow]{message}[/]");
+        }
+
+        private void DisplayErrorMessage(string message, params object[] args)
+        {
+            var formattedMessage = string.Format(message, args);
+            AnsiConsole.MarkupLine($"[red]{formattedMessage}[/]");
         }
     }
 }

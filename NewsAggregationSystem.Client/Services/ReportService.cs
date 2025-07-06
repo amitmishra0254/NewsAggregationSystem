@@ -13,53 +13,86 @@ namespace NewsAggregationSystem.Client.Services
     public class ReportService : IReportService
     {
         private readonly HttpClient httpClient;
-        private readonly JsonSerializerOptions options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
+        private readonly JsonSerializerOptions jsonOptions;
 
         public ReportService(HttpClient httpClient)
         {
             this.httpClient = httpClient;
+            this.jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         }
 
-        public async Task ReportNewsArticle(int articleId)
+        public async Task CreateArticleReportAsync(int articleId)
         {
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
-
-                var reason = InputHelper.ReadString("Enter the reason for reporting this article: ");
-
-                var reportDto = new ReportRequestDTO
-                {
-                    ArticleId = articleId,
-                    Reason = reason
-                };
-
-                var response = await httpClient.PostAsJsonAsync("Reports", reportDto);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    AnsiConsole.MarkupLine($"[green]Article with ID {articleId} reported successfully.[/]");
-                }
-                else if (response.StatusCode == HttpStatusCode.BadRequest ||
-                         response.StatusCode == HttpStatusCode.NotFound)
-                {
-                    var message = await response.Content.ReadAsStringAsync();
-                    AnsiConsole.MarkupLine($"[yellow]{message}[/]");
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine($"[red]Failed to report article. Status code: {(int)response.StatusCode} - {response.ReasonPhrase}[/]");
-                }
+                SetAuthorizationHeader();
+                var reportDto = CreateReportRequestAsync(articleId);
+                var response = await SendReportRequestAsync(reportDto);
+                await HandleReportResponseAsync(response, articleId);
             }
             catch (Exception exception)
             {
-                AnsiConsole.MarkupLine($"[red]Error occurred while reporting the article: {exception.Message}[/]");
+                DisplayErrorMessage("Error occurred while reporting the article: {0}", exception.Message);
             }
         }
 
+        private void SetAuthorizationHeader()
+        {
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
+        }
+
+        private ReportRequestDTO CreateReportRequestAsync(int articleId)
+        {
+            var reason = InputHelper.ReadString("Enter the reason for reporting this article: ");
+            return new ReportRequestDTO
+            {
+                ArticleId = articleId,
+                Reason = reason
+            };
+        }
+
+        private async Task<HttpResponseMessage> SendReportRequestAsync(ReportRequestDTO reportDto)
+        {
+            return await httpClient.PostAsJsonAsync("Reports", reportDto);
+        }
+
+        private async Task HandleReportResponseAsync(HttpResponseMessage response, int articleId)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                DisplaySuccessMessage("Article with ID {0} reported successfully.", articleId);
+                return;
+            }
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.BadRequest:
+                case HttpStatusCode.NotFound:
+                    var message = await response.Content.ReadAsStringAsync();
+                    DisplayWarningMessage(message);
+                    break;
+                default:
+                    DisplayErrorMessage("Failed to report article. Status code: {0} - {1}", (int)response.StatusCode, response.ReasonPhrase);
+                    break;
+            }
+        }
+
+        private void DisplaySuccessMessage(string message, params object[] args)
+        {
+            var formattedMessage = string.Format(message, args);
+            AnsiConsole.MarkupLine($"[green]{formattedMessage}[/]");
+        }
+
+        private void DisplayWarningMessage(string message, params object[] args)
+        {
+            var formattedMessage = string.Format(message, args);
+            AnsiConsole.MarkupLine($"[yellow]{formattedMessage}[/]");
+        }
+
+        private void DisplayErrorMessage(string message, params object[] args)
+        {
+            var formattedMessage = string.Format(message, args);
+            AnsiConsole.MarkupLine($"[red]{formattedMessage}[/]");
+        }
     }
 }

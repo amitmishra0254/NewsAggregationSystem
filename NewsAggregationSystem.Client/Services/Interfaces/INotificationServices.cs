@@ -4,6 +4,6 @@ namespace NewsAggregationSystem.Client.Services.Interfaces
 {
     public interface INotificationServices
     {
-        Task<List<NotificationDTO>> GetAllNotifications();
+        Task<List<NotificationDTO>> GetUserNotificationsAsync();
     }
 }

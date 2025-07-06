@@ -4,8 +4,8 @@ namespace NewsAggregationSystem.Client.Services.Interfaces
 {
     public interface INewsSourcesService
     {
-        Task AddNewsSource(CreateNewsSourceDTO newsSource);
-        Task<List<NewsSourceDTO>> GetAllNewsSource();
-        Task UpdateNewsSource(int Id, UpdateNewsSourceDTO updateNewsSourceDTO);
+        Task CreateNewsSourceAsync(CreateNewsSourceDTO newsSource);
+        Task<List<NewsSourceDTO>> GetAllNewsSourcesAsync();
+        Task UpdateNewsSourceAsync(int Id, UpdateNewsSourceDTO updateNewsSourceDTO);
     }
 }

@@ -4,9 +4,9 @@ namespace NewsAggregationSystem.Client.Services.Interfaces
 {
     public interface INotificationPreferenceService
     {
-        Task<List<NotificationPreferenceDTO>> GetUserNotificationPreferences();
-        Task AddKeyword(string keyword, int categoryId);
-        Task ChangeKeywordStatus(int keywordId, bool isEnable);
-        Task ChangeCategoryStatus(int categoryId, bool isEnable);
+        Task<List<NotificationPreferenceDTO>> GetUserNotificationPreferencesAsync();
+        Task AddKeywordToCategoryAsync(string keyword, int categoryId);
+        Task UpdateKeywordStatusAsync(int keywordId, bool isEnable);
+        Task UpdateCategoryStatusAsync(int categoryId, bool isEnable);
     }
 }

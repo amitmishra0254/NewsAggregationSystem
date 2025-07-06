@@ -11,43 +11,51 @@ namespace NewsAggregationSystem.Client.Services
     public class NotificationServices : INotificationServices
     {
         private readonly HttpClient httpClient;
-        private readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
+        private readonly JsonSerializerOptions jsonOptions;
 
         public NotificationServices(HttpClient httpClient)
         {
             this.httpClient = httpClient;
+            this.jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         }
 
-        public async Task<List<NotificationDTO>> GetAllNotifications()
+        public async Task<List<NotificationDTO>> GetUserNotificationsAsync()
         {
-            List<NotificationDTO> notifications = new List<NotificationDTO>();
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
-
+                SetAuthorizationHeader();
                 var response = await httpClient.GetAsync(ApplicationConstants.Notification);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var json = await response.Content.ReadAsStringAsync();
-                    notifications = JsonSerializer.Deserialize<List<NotificationDTO>>(json, jsonSerializerOptions);
-                }
-                else
-                {
-                    AnsiConsole.MarkupLine($"[red]Failed to fetch notifications. Status Code: {(int)response.StatusCode}[/]");
-                    AnsiConsole.MarkupLine($"[red]Reason: {response.ReasonPhrase}[/]");
-                }
+                return await HandleGetNotificationsResponseAsync(response);
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]Error occurred while fetching notifications: {ex.Message}[/]");
+                DisplayErrorMessage(ApplicationConstants.LogMessage.ErrorFetchingSavedArticles, ex.Message);
+                return new List<NotificationDTO>();
+            }
+        }
+
+        private void SetAuthorizationHeader()
+        {
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
+        }
+
+        private async Task<List<NotificationDTO>> HandleGetNotificationsResponseAsync(HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<List<NotificationDTO>>(json, jsonOptions) ?? new List<NotificationDTO>();
             }
 
-            return notifications;
+            DisplayErrorMessage("Failed to fetch notifications. Status Code: {0}", (int)response.StatusCode);
+            DisplayErrorMessage("Reason: {0}", response.ReasonPhrase);
+            return new List<NotificationDTO>();
+        }
+
+        private void DisplayErrorMessage(string message, params object[] args)
+        {
+            var formattedMessage = string.Format(message, args);
+            AnsiConsole.MarkupLine($"[red]{formattedMessage}[/]");
         }
     }
 }

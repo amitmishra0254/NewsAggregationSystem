@@ -4,12 +4,12 @@ namespace NewsAggregationSystem.Client.Services.Interfaces
 {
     public interface IArticleService
     {
-        Task<List<ArticleDTO>> GetSavedArticles();
-        Task<List<ArticleDTO>> GetAllArticles(NewsArticleRequestDTO request);
-        Task ReactArticle(int articleId, int reactionId);
-        Task SaveArticle(int articleId);
-        Task DeleteSavedArticle(int articleId);
-        Task ToggleArticleVisibility(int articleId, bool isHidden);
-        Task<ArticleDTO?> GetArticleById(int articleId);
+        Task<List<ArticleDTO>> GetUserSavedArticlesAsync();
+        Task<List<ArticleDTO>> GetUserArticlesAsync(NewsArticleRequestDTO request);
+        Task ReactToArticleAsync(int articleId, int reactionId);
+        Task SaveArticleAsync(int articleId);
+        Task RemoveSavedArticleAsync(int articleId);
+        Task ToggleArticleVisibilityAsync(int articleId, bool isHidden);
+        Task<ArticleDTO?> GetArticleByIdAsync(int articleId);
     }
 }

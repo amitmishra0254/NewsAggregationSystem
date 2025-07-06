@@ -83,6 +83,68 @@
             public const string CreatingArticleReport = "User {UserId} is attempting to report article ID: {ArticleId} with reason: {Reason}";
             public const string ArticleReportCreated = "Article ID: {ArticleId} reported successfully by user ID: {UserId}";
             public const string ArticleAlreadyReported = "Article ID: {ArticleId} has already been reported by user ID: {UserId}";
+            
+            // Client UI Messages
+            public const string InvalidEmailPasswordFormat = "Invalid email or password format.";
+            public const string IncorrectEmailPassword = "Incorrect email or password.";
+            public const string NoAccountFound = "No account found with the provided email.";
+            public const string LoginFailed = "Login failed. Status: {StatusCode} - {ReasonPhrase}";
+            public const string LoginError = "Login error: {ErrorMessage}";
+            public const string AccountCreatedSuccessfully = "Account Created Successfully.";
+            public const string InvalidInputDetails = "Invalid input. Please check the details you entered.";
+            public const string AccountAlreadyExists = "An account with this email already exists.";
+            public const string SignupFailed = "Signup failed. Status: {StatusCode} - {ReasonPhrase}";
+            public const string SignupError = "Signup error: {ErrorMessage}";
+            
+            // Article Service Messages
+            public const string FailedToRetrieveSavedArticles = "Failed to retrieve saved articles. Status code: {StatusCode}";
+            public const string ErrorFetchingSavedArticles = "Error occurred while fetching saved articles: {ErrorMessage}";
+            public const string FailedToFetchArticles = "Failed to fetch articles. Status Code: {StatusCode}";
+            public const string ErrorFetchingArticles = "Error occurred while fetching articles: {ErrorMessage}";
+            public const string ClientArticleSavedSuccessfully = "Article saved successfully.";
+            public const string ClientArticleNotFound = "Article with ID {ArticleId} not found.";
+            public const string ArticleAlreadySaved = "Article is already saved.";
+            public const string FailedToSaveArticle = "Failed to save article. Status code: {StatusCode}";
+            public const string ErrorSavingArticle = "Error occurred while saving article: {ErrorMessage}";
+            public const string ClientArticleReactedSuccessfully = "Article {ReactionName} successfully.";
+            public const string AlreadyReactedToArticle = "You have already reacted to this article.";
+            public const string FailedToReactToArticle = "Failed to react to article. Status code: {StatusCode}";
+            public const string ErrorReactingToArticle = "Error occurred while reacting to article: {ErrorMessage}";
+            public const string ArticleRemovedFromSaved = "Article removed from saved list successfully.";
+            public const string ArticleNotSaved = "Article is not saved. Save it before trying to delete it.";
+            public const string FailedToDeleteSavedArticle = "Failed to delete saved article. Status code: {StatusCode}";
+            public const string ErrorDeletingSavedArticle = "Error occurred while deleting saved article: {ErrorMessage}";
+            public const string ArticleVisibilityUpdated = "Article ID {ArticleId} is now {Visibility}.";
+            public const string ArticleAlreadyInState = "Article is already {State}.";
+            public const string FailedToUpdateArticleVisibility = "Failed to update article visibility. Status code: {StatusCode}";
+            public const string ErrorTogglingArticleVisibility = "Error occurred while toggling article visibility: {ErrorMessage}";
+            public const string UnauthorizedAccess = "Unauthorized: Please login as a valid user.";
+            public const string ErrorFetchingArticle = "Error occurred while fetching the article: {ErrorMessage}";
+            
+            // News Sources Service Messages
+            public const string ExternalServerCreatedSuccessfully = "External Server Created Successfully!";
+            public const string AddNewsSourceFailed = "Add news source failed: {ErrorMessage}.";
+            public const string ErrorAddingNewsSource = "Error adding news source: {ErrorMessage}";
+            public const string GetAllNewsSourcesFailed = "Get all news sources failed: {ErrorMessage}.";
+            public const string ErrorFetchingNewsSources = "Error while fetching news sources: {ErrorMessage}";
+            public const string ExternalServerUpdatedSuccessfully = "External server updated successfully.";
+            public const string ExternalServerNotFound = "External server with Id {ServerId} not found.";
+            public const string FailedToUpdateExternalServer = "Failed to update. Status Code: {StatusCode}";
+            public const string ErrorUpdatingNewsSource = "Error updating news source: {ErrorMessage}";
+            
+            // News Category Service Messages
+            public const string ClientNewsCategoryAddedSuccessfully = "News category added successfully.";
+            public const string NewsCategoryAlreadyExists = "News category already exists with this name.";
+            public const string FailedToAddCategory = "Failed to add category. Status Code: {StatusCode}";
+            public const string ErrorAddingNewsCategory = "Error while adding news category: {ErrorMessage}";
+            public const string CategoryHiddenSuccessfully = "Category hidden successfully.";
+            public const string CategoryUnhiddenSuccessfully = "Category unhidden successfully.";
+            public const string CategoryVisibilityAlreadyUpdated = "Category visibility is already updated.";
+            public const string CategoryNotFound = "Category not found.";
+            public const string FailedToToggleCategoryVisibility = "Failed to toggle category visibility. Status Code: {StatusCode}";
+            public const string ErrorTogglingCategoryVisibility = "Error occurred: {ErrorMessage}";
+            public const string FailedToRetrieveNewsCategories = "Failed to retrieve news categories. Status code: {StatusCode}";
+            public const string ErrorFetchingCategories = "Error occurred while fetching categories: {ErrorMessage}";
         }
 
 

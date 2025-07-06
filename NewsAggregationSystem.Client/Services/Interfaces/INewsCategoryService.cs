@@ -4,8 +4,8 @@ namespace NewsAggregationSystem.Client.Services.Interfaces
 {
     public interface INewsCategoryService
     {
-        Task AddNewsCategory(string category);
-        Task ToggleNewsCategoryVisibility(int categoryId, bool isHidden);
-        Task<List<NotificationPreferencesKeywordDTO>> GetAllNewsCategories();
+        Task CreateNewsCategoryAsync(string category);
+        Task ToggleCategoryVisibilityAsync(int categoryId, bool isHidden);
+        Task<List<NotificationPreferencesKeywordDTO>> GetAllNewsCategoriesAsync();
     }
 }
