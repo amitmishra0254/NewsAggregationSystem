@@ -57,6 +57,19 @@
             // User related messages
             public const string FetchingAllUsers = "Fetching all users.";
             public const string UsersFetchedSuccessfully = "Fetched {Count} users successfully.";
+            
+            // News Source related messages
+            public const string FetchingAllNewsSources = "Fetching all news sources.";
+            public const string NewsSourcesFetchedSuccessfully = "Fetched {Count} news sources.";
+            public const string FetchingNewsSourceById = "Fetching news source with ID: {NewsSourceId}";
+            public const string NewsSourceFetchedSuccessfully = "News source with ID: {NewsSourceId} fetched successfully.";
+            public const string NewsSourceNotFoundById = "News source with ID: {NewsSourceId} not found.";
+            public const string CreatingNewsSource = "Adding new news source with name: {NewsSourceName}";
+            public const string NewsSourceCreatedSuccessfully = "News source '{NewsSourceName}' added successfully by user ID: {UserId}";
+            public const string UpdatingNewsSource = "Updating news source ID: {NewsSourceId}";
+            public const string NewsSourceUpdatedSuccessfully = "News source ID: {NewsSourceId} updated successfully by user ID: {UserId}";
+            public const string DeletingNewsSource = "Deleting news source with ID: {NewsSourceId}";
+            public const string NewsSourceDeletedSuccessfully = "News source with ID: {NewsSourceId} deleted successfully.";
         }
 
 
