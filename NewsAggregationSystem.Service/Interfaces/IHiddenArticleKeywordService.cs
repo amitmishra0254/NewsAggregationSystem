@@ -2,6 +2,6 @@
 {
     public interface IHiddenArticleKeywordService
     {
-        Task<int> Add(string keyword, int userId);
+        Task<int> AddHiddenKeywordAsync(string keyword, int userId);
     }
 }

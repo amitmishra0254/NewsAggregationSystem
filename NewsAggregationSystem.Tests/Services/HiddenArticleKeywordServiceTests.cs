@@ -28,7 +28,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<HiddenArticleKeyword>()))
                 .ReturnsAsync(1);
 
-            var result = await hiddenArticleKeywordService.Add(keyword, userId);
+            var result = await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword, userId);
 
             Assert.AreEqual(1, result);
             mockHiddenArticleKeywordRepository.Verify(repo => repo.AddAsync(It.Is<HiddenArticleKeyword>(k =>
@@ -48,7 +48,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<HiddenArticleKeyword>()))
                 .ReturnsAsync(1);
 
-            var result = await hiddenArticleKeywordService.Add(keyword, userId);
+            var result = await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword, userId);
 
             Assert.AreEqual(1, result);
             mockHiddenArticleKeywordRepository.Verify(repo => repo.AddAsync(It.Is<HiddenArticleKeyword>(k =>
@@ -69,7 +69,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<HiddenArticleKeyword>()))
                 .ReturnsAsync(1);
 
-            var result = await hiddenArticleKeywordService.Add(keyword, userId);
+            var result = await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword, userId);
 
             Assert.AreEqual(1, result);
             mockHiddenArticleKeywordRepository.Verify(repo => repo.AddAsync(It.Is<HiddenArticleKeyword>(k =>
@@ -88,7 +88,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<HiddenArticleKeyword>()))
                 .ReturnsAsync(0);
 
-            var result = await hiddenArticleKeywordService.Add(keyword, userId);
+            var result = await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword, userId);
 
             Assert.AreEqual(0, result);
             mockHiddenArticleKeywordRepository.Verify(repo => repo.AddAsync(It.IsAny<HiddenArticleKeyword>()), Times.Once);
@@ -104,7 +104,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<HiddenArticleKeyword>()))
                 .ReturnsAsync(5);
 
-            var result = await hiddenArticleKeywordService.Add(keyword, userId);
+            var result = await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword, userId);
 
             Assert.AreEqual(5, result);
             mockHiddenArticleKeywordRepository.Verify(repo => repo.AddAsync(It.IsAny<HiddenArticleKeyword>()), Times.Once);
@@ -120,7 +120,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<HiddenArticleKeyword>()))
                 .ReturnsAsync(1);
 
-            var result = await hiddenArticleKeywordService.Add(keyword, userId);
+            var result = await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword, userId);
 
             Assert.AreEqual(1, result);
             mockHiddenArticleKeywordRepository.Verify(repo => repo.AddAsync(It.Is<HiddenArticleKeyword>(k =>
@@ -139,7 +139,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<HiddenArticleKeyword>()))
                 .ReturnsAsync(1);
 
-            var result = await hiddenArticleKeywordService.Add(keyword, userId);
+            var result = await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword, userId);
 
             Assert.AreEqual(1, result);
             mockHiddenArticleKeywordRepository.Verify(repo => repo.AddAsync(It.Is<HiddenArticleKeyword>(k =>
@@ -158,7 +158,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<HiddenArticleKeyword>()))
                 .ReturnsAsync(1);
 
-            var result = await hiddenArticleKeywordService.Add(keyword, userId);
+            var result = await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword, userId);
 
             Assert.AreEqual(1, result);
             mockHiddenArticleKeywordRepository.Verify(repo => repo.AddAsync(It.Is<HiddenArticleKeyword>(k =>
@@ -177,7 +177,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<HiddenArticleKeyword>()))
                 .ReturnsAsync(1);
 
-            var result = await hiddenArticleKeywordService.Add(keyword, userId);
+            var result = await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword, userId);
 
             Assert.AreEqual(1, result);
             mockHiddenArticleKeywordRepository.Verify(repo => repo.AddAsync(It.Is<HiddenArticleKeyword>(k =>
@@ -199,7 +199,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .ThrowsAsync(expectedException);
 
             var exception = Assert.ThrowsAsync<InvalidOperationException>(async () =>
-                await hiddenArticleKeywordService.Add(keyword, userId));
+                await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword, userId));
 
             Assert.AreEqual(expectedException, exception);
         }
@@ -215,8 +215,8 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<HiddenArticleKeyword>()))
                 .ReturnsAsync(1);
 
-            var result1 = await hiddenArticleKeywordService.Add(keyword1, userId);
-            var result2 = await hiddenArticleKeywordService.Add(keyword2, userId);
+            var result1 = await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword1, userId);
+            var result2 = await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword2, userId);
 
             Assert.AreEqual(1, result1);
             Assert.AreEqual(1, result2);
@@ -240,7 +240,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<HiddenArticleKeyword>()))
                 .ReturnsAsync(1);
 
-            var result = await hiddenArticleKeywordService.Add(keyword, userId);
+            var result = await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword, userId);
 
             Assert.AreEqual(1, result);
             mockHiddenArticleKeywordRepository.Verify(repo => repo.AddAsync(It.Is<HiddenArticleKeyword>(k =>

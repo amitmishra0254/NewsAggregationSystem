@@ -53,6 +53,10 @@
             public const string PredictingCategoryForArticle = "Predicting category for article with title: {Title}";
             public const string ResolvedCategoryId = "Resolved category ID: {CategoryId} for title: {Title}";
             public const string ArticleProcessed = "Article processed: {Title}";
+            
+            // User related messages
+            public const string FetchingAllUsers = "Fetching all users.";
+            public const string UsersFetchedSuccessfully = "Fetched {Count} users successfully.";
         }
 
 

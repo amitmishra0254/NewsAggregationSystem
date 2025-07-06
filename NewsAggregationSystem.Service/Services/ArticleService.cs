@@ -43,6 +43,20 @@ namespace NewsAggregationSystem.Service.Services
             this.notificationPreferenceService = notificationPreferenceService;
         }
 
+        public async Task<List<ArticleDTO>> GetUserArticlesAsync(NewsArticleRequestDTO newsArticleRequestDTO, int userId) => await GetAllArticles(newsArticleRequestDTO, userId);
+
+        public async Task<ArticleDTO> GetUserArticleByIdAsync(int articleId, int userId) => await GetArticleById(articleId, userId);
+
+        public async Task<int> DeleteUserSavedArticleAsync(int articleId, int userId) => await DeleteSavedArticles(articleId, userId);
+
+        public async Task<List<ArticleDTO>> GetUserSavedArticlesAsync(int userId) => await GetAllSavedArticles(userId);
+
+        public async Task<int> SaveUserArticleAsync(int articleId, int userId) => await SaveArticle(articleId, userId);
+
+        public async Task<int> ReactToArticleAsync(int articleId, int userId, int reactionId) => await ReactArticle(articleId, userId, reactionId);
+
+        public async Task<int> ToggleArticleVisibilityAsync(int articleId, int userId, bool isHidden) => await ToggleVisibility(articleId, userId, isHidden);
+
         public async Task<List<ArticleDTO>> GetAllArticles(NewsArticleRequestDTO newsArticleRequestDTO, int userId)
         {
             Expression<Func<Article, bool>> expression = article => true;

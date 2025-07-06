@@ -15,7 +15,7 @@ namespace NewsAggregationSystem.Service.Services
             this.hiddenArticleKeywordRepository = hiddenArticleKeywordRepository;
         }
 
-        public async Task<int> Add(string keyword, int userId)
+        public async Task<int> AddHiddenKeywordAsync(string keyword, int userId)
         {
             var hiddenArticleKeyword = new HiddenArticleKeyword
             {

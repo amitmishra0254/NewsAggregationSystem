@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NewsAggregationSystem.Common.Constants;
+using NewsAggregationSystem.Common.DTOs.Users;
 using NewsAggregationSystem.Service.Interfaces;
 
 namespace NewsAggregationSystem.API.Controllers
@@ -17,21 +19,41 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAllUsers()
         {
-            logger.LogInformation("Fetching all users.");
+            logger.LogInformation(ApplicationConstants.LogMessage.FetchingAllUsers);
 
             try
             {
-                var users = await userService.GetAllUsers();
-                logger.LogInformation("Fetched {Count} users successfully.", users.Count);
+                var users = await RetrieveAllUsersAsync();
+                LogUsersRetrievedSuccessfully(users.Count);
                 return Ok(users);
             }
             catch (Exception exception)
             {
-                logger.LogError(exception, exception.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
+                LogUserRetrievalError(exception);
+                return CreateInternalServerErrorResponse(exception);
             }
+        }
+
+        private async Task<List<UserResponseDTO>> RetrieveAllUsersAsync()
+        {
+            return await userService.GetAllUsers();
+        }
+
+        private void LogUsersRetrievedSuccessfully(int userCount)
+        {
+            logger.LogInformation(ApplicationConstants.LogMessage.UsersFetchedSuccessfully, userCount);
+        }
+
+        private void LogUserRetrievalError(Exception exception)
+        {
+            logger.LogError(exception, exception.Message);
+        }
+
+        private IActionResult CreateInternalServerErrorResponse(Exception exception)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
         }
     }
 }
