@@ -139,7 +139,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(service => service.AddNotificationPreferencesPerUser(It.IsAny<int>()))
                 .Returns(Task.CompletedTask);
 
-            var result = await userService.AddUser(userRequest);
+            var result = await userService.CreateUserAsync(userRequest);
 
             Assert.AreEqual(1, result);
             mockUserRepository.Verify(repo => repo.AddAsync(It.Is<User>(u =>
@@ -181,7 +181,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<User> { existingUser }.AsQueryable().BuildMockDbSet().Object);
 
             var exception = Assert.ThrowsAsync<AlreadyExistException>(async () =>
-                await userService.AddUser(userRequest));
+                await userService.CreateUserAsync(userRequest));
 
             Assert.IsTrue(exception.Message.Contains(userRequest.Email));
             mockUserRepository.Verify(repo => repo.AddAsync(It.IsAny<User>()), Times.Never);

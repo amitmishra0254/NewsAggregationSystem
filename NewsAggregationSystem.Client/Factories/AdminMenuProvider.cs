@@ -90,7 +90,7 @@ namespace NewsAggregationSystem.Client.Factories
 
         private async Task ToggleNewsCategoryHandler(bool IsHidden)
         {
-            var categories = await newsCategoryService.GetAllNewsCategories();
+            var categories = await newsCategoryService.GetAllNewsCategoriesAsync();
             var categoryMap = categories
                     .Where(category => category.Name != CategoryType.All.ToString())
                     .ToDictionary(category => $"{category.Name} {(category.IsEnabled ? "(Hidden)" : "")}", category => category);
@@ -109,25 +109,25 @@ namespace NewsAggregationSystem.Client.Factories
             }
 
             var matchedCategory = categoryMap[categoryName];
-            await newsCategoryService.ToggleNewsCategoryVisibility(matchedCategory.Id, IsHidden);
+            await newsCategoryService.ToggleNewsCategoryVisibilityAsync(matchedCategory.Id, IsHidden);
         }
 
         private async Task ToggleArticleVisibilityHandler(bool IsHidden)
         {
             int articleId = InputHelper.ReadInt("Enter article Id: ");
-            await articleService.ToggleArticleVisibility(articleId, IsHidden);
+            await articleService.ToggleArticleVisibilityAsync(articleId, IsHidden);
         }
 
         private async Task HideArticlesByNewsKeywordHandler()
         {
             string keyword = InputHelper.ReadString("Enter the keyword: ");
-            await adminService.AddKeywordToHideArticles(keyword);
+            await adminService.AddKeywordToHideArticlesAsync(keyword);
         }
 
         private async Task AddNewsCategory()
         {
             string newsCategory = InputHelper.ReadString("Enter new News Category: ");
-            await newsCategoryService.AddNewsCategory(newsCategory);
+            await newsCategoryService.CreateNewsCategoryAsync(newsCategory);
         }
 
         private async Task EditExternalServer()
@@ -146,12 +146,12 @@ namespace NewsAggregationSystem.Client.Factories
                 ApiKey = apiKey,
                 IsActive = isActive
             };
-            await newsSourcesService.UpdateNewsSource(id, updateNewsSourceDTO);
+            await newsSourcesService.UpdateNewsSourceAsync(id, updateNewsSourceDTO);
         }
 
         private async Task ViewExternalServerDetails()
         {
-            var servers = await newsSourcesService.GetAllNewsSource();
+            var servers = await newsSourcesService.GetAllNewsSourcesAsync();
 
             if (servers == null || !servers.Any())
             {
@@ -186,7 +186,7 @@ namespace NewsAggregationSystem.Client.Factories
 
         private async Task ViewAllExternalServers()
         {
-            var servers = await newsSourcesService.GetAllNewsSource();
+            var servers = await newsSourcesService.GetAllNewsSourcesAsync();
 
             if (servers == null || !servers.Any())
             {
@@ -231,7 +231,7 @@ namespace NewsAggregationSystem.Client.Factories
                 ApiKey = apiKey
             };
 
-            await newsSourcesService.AddNewsSource(newsSource);
+            await newsSourcesService.CreateNewsSourceAsync(newsSource);
         }
 
     }

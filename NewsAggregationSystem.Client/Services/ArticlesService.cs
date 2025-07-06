@@ -72,7 +72,7 @@ namespace NewsAggregationSystem.Client.Services
             try
             {
                 SetAuthorizationHeader();
-                var url = $"Articles/{articleId}/react-article{reactionId}";
+                var url = $"Articles/{articleId}/react-article/{reactionId}";
                 var response = await httpClient.PostAsync(url, null);
                 await HandleReactToArticleResponseAsync(response, articleId, reactionId);
             }
@@ -128,7 +128,7 @@ namespace NewsAggregationSystem.Client.Services
 
         private void SetAuthorizationHeader()
         {
-            httpClient.DefaultRequestHeaders.Authorization = 
+            httpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
         }
 

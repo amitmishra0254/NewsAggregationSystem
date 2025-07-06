@@ -43,21 +43,7 @@ namespace NewsAggregationSystem.Service.Services
             this.notificationPreferenceService = notificationPreferenceService;
         }
 
-        public async Task<List<ArticleDTO>> GetUserArticlesAsync(NewsArticleRequestDTO newsArticleRequestDTO, int userId) => await GetAllArticles(newsArticleRequestDTO, userId);
-
-        public async Task<ArticleDTO> GetUserArticleByIdAsync(int articleId, int userId) => await GetArticleById(articleId, userId);
-
-        public async Task<int> DeleteUserSavedArticleAsync(int articleId, int userId) => await DeleteSavedArticles(articleId, userId);
-
-        public async Task<List<ArticleDTO>> GetUserSavedArticlesAsync(int userId) => await GetAllSavedArticles(userId);
-
-        public async Task<int> SaveUserArticleAsync(int articleId, int userId) => await SaveArticle(articleId, userId);
-
-        public async Task<int> ReactToArticleAsync(int articleId, int userId, int reactionId) => await ReactArticle(articleId, userId, reactionId);
-
-        public async Task<int> ToggleArticleVisibilityAsync(int articleId, int userId, bool isHidden) => await ToggleVisibility(articleId, userId, isHidden);
-
-        public async Task<List<ArticleDTO>> GetAllArticles(NewsArticleRequestDTO newsArticleRequestDTO, int userId)
+        public async Task<List<ArticleDTO>> GetUserArticlesAsync(NewsArticleRequestDTO newsArticleRequestDTO, int userId)
         {
             Expression<Func<Article, bool>> expression = article => true;
 
@@ -99,21 +85,22 @@ namespace NewsAggregationSystem.Service.Services
             {
                 return mapper.Map<List<ArticleDTO>>(articles);
             }
-            articles = await GetRecommendedArticles(userId, articles.Where(article => !article.IsHidden).ToList());
-
-            return mapper.Map<List<ArticleDTO>>(articles);
+            var recommendedArticles = await GetRecommendedArticles(userId, articles.Where(article => !article.IsHidden).ToList());
+            var excludedArticles = articles.Where(article => !recommendedArticles.Select(recommendedArticle => recommendedArticle.Id).Contains(article.Id)).ToList();
+            recommendedArticles.AddRange(excludedArticles);
+            return mapper.Map<List<ArticleDTO>>(recommendedArticles);
         }
 
-        public async Task<ArticleDTO> GetArticleById(int Id, int userId)
+        public async Task<ArticleDTO> GetUserArticleByIdAsync(int articleId, int userId)
         {
-            var article = await articleRepository.GetArticleById(Id, userId);
+            var article = await articleRepository.GetArticleById(articleId, userId);
 
             if (article == null)
-                throw new NotFoundException($"Article with ID {Id} not found.");
+                throw new NotFoundException($"Article with ID {articleId} not found.");
 
             var articleReadHistory = new ArticleReadHistory
             {
-                ArticleId = Id,
+                ArticleId = articleId,
                 UserId = userId,
                 CreatedById = userId,
                 CreatedDate = dateTimeHelper.CurrentUtcDateTime
@@ -123,18 +110,7 @@ namespace NewsAggregationSystem.Service.Services
             return mapper.Map<ArticleDTO>(article);
         }
 
-        public async Task<int> HideArticle(int articleId)
-        {
-            var article = await articleRepository.GetWhere(article => article.Id == articleId).FirstOrDefaultAsync();
-            if (article != null)
-            {
-                article.IsHidden = true;
-                return await articleRepository.UpdateAsync(article);
-            }
-            throw new NotFoundException(string.Format(ApplicationConstants.ArticleNotFoundWithThisId, articleId));
-        }
-
-        public async Task<int> DeleteSavedArticles(int articleId, int userId)
+        public async Task<int> DeleteUserSavedArticleAsync(int articleId, int userId)
         {
             if (!await articleRepository.GetWhere(article => article.Id == articleId).AnyAsync())
             {
@@ -149,7 +125,7 @@ namespace NewsAggregationSystem.Service.Services
             return 0;
         }
 
-        public async Task<List<ArticleDTO>> GetAllSavedArticles(int userId)
+        public async Task<List<ArticleDTO>> GetUserSavedArticlesAsync(int userId)
         {
             var savedArticle = await savedArticleRepository.GetWhere(savedArticle => savedArticle.UserId == userId &&
                 !savedArticle.Article.NewsCategory.IsHidden &&
@@ -170,7 +146,28 @@ namespace NewsAggregationSystem.Service.Services
             }
         }
 
-        public async Task<int> ReactArticle(int articleId, int userId, int reactionId)
+        public async Task<int> SaveUserArticleAsync(int articleId, int userId)
+        {
+            if (!await IsNewsArticleExist(articleId))
+            {
+                throw new NotFoundException(string.Format(ApplicationConstants.ArticleNotFoundWithThisId, articleId));
+            }
+            var existingSavedArticle = await savedArticleRepository.GetWhere(article => article.UserId == userId && article.ArticleId == articleId).FirstOrDefaultAsync();
+            if (existingSavedArticle == null)
+            {
+                var articleToSave = new SavedArticle()
+                {
+                    ArticleId = articleId,
+                    UserId = userId,
+                    CreatedById = userId,
+                    CreatedDate = dateTimeHelper.CurrentUtcDateTime
+                };
+                return await savedArticleRepository.AddAsync(articleToSave);
+            }
+            return 0;
+        }
+
+        public async Task<int> ReactToArticleAsync(int articleId, int userId, int reactionId)
         {
             if (!await articleRepository.GetWhere(article => article.Id == articleId).AnyAsync())
             {
@@ -199,16 +196,16 @@ namespace NewsAggregationSystem.Service.Services
             return await articleReactionRepository.AddAsync(articleReaction);
         }
 
-        public async Task<int> ToggleVisibility(int articleId, int userId, bool IsHidden)
+        public async Task<int> ToggleArticleVisibilityAsync(int articleId, int userId, bool isHidden)
         {
             if (!await articleRepository.GetWhere(article => article.Id == articleId).AnyAsync())
             {
                 throw new NotFoundException(string.Format(ApplicationConstants.ArticleNotFoundWithThisId, articleId));
             }
             var existingArticle = await articleRepository.GetWhere(article => article.Id == articleId).FirstOrDefaultAsync();
-            if (existingArticle != null && existingArticle.IsHidden != IsHidden)
+            if (existingArticle != null && existingArticle.IsHidden != isHidden)
             {
-                existingArticle.IsHidden = IsHidden;
+                existingArticle.IsHidden = isHidden;
                 existingArticle.ModifiedById = userId;
                 existingArticle.ModifiedDate = dateTimeHelper.CurrentUtcDateTime;
                 return await articleRepository.UpdateAsync(existingArticle);
@@ -216,25 +213,16 @@ namespace NewsAggregationSystem.Service.Services
             return 0;
         }
 
-        public async Task<int> SaveArticle(int articleId, int userId)
+
+        public async Task<int> HideArticle(int articleId)
         {
-            if (!await IsNewsArticleExist(articleId))
+            var article = await articleRepository.GetWhere(article => article.Id == articleId).FirstOrDefaultAsync();
+            if (article != null)
             {
-                throw new NotFoundException(string.Format(ApplicationConstants.ArticleNotFoundWithThisId, articleId));
+                article.IsHidden = true;
+                return await articleRepository.UpdateAsync(article);
             }
-            var existingSavedArticle = await savedArticleRepository.GetWhere(article => article.UserId == userId && article.ArticleId == articleId).FirstOrDefaultAsync();
-            if (existingSavedArticle == null)
-            {
-                var articleToSave = new SavedArticle()
-                {
-                    ArticleId = articleId,
-                    UserId = userId,
-                    CreatedById = userId,
-                    CreatedDate = dateTimeHelper.CurrentUtcDateTime
-                };
-                return await savedArticleRepository.AddAsync(articleToSave);
-            }
-            return 0;
+            throw new NotFoundException(string.Format(ApplicationConstants.ArticleNotFoundWithThisId, articleId));
         }
 
         public async Task<bool> IsNewsArticleExist(int articleId)
@@ -251,7 +239,7 @@ namespace NewsAggregationSystem.Service.Services
             await AddIfNotNull(articleRepository.GetMostSavedCategory(userId), recommendedCategories);
             await AddIfNotNull(articleRepository.GetMostReadCategory(userId), recommendedCategories);
 
-            var notificationPreferences = await notificationPreferenceService.GetNotificationPreferences(new List<int> { userId });
+            var notificationPreferences = await notificationPreferenceService.GetUserNotificationPreferencesAsync(new List<int> { userId });
 
             await AddRecommendationIfNotPresent(notificationPreferences, recommendedCategories);
 
@@ -281,12 +269,13 @@ namespace NewsAggregationSystem.Service.Services
 
         private async Task AddRecommendationIfNotPresent(List<NotificationPreferenceDTO> notificationPreference, List<CategoryRecommendationDTO> recommendedCategories)
         {
-            foreach (var category in notificationPreference.First().NewsCategories)
+            var categories = notificationPreference.First().NewsCategories.Where(category => category.IsEnabled);
+            foreach (var category in categories)
             {
                 var existingRecommendedCategory = recommendedCategories.Where(recommendedCategory => recommendedCategory.CategoryId == category.CategoryId).FirstOrDefault();
                 if (existingRecommendedCategory != null)
                 {
-                    existingRecommendedCategory.Keywords = category.Keywords.Select(keyword => keyword.Name).ToList();
+                    existingRecommendedCategory.Keywords = category.Keywords.Where(keyword => keyword.IsEnabled).Select(keyword => keyword.Name).ToList();
                 }
                 else
                 {
@@ -320,7 +309,7 @@ namespace NewsAggregationSystem.Service.Services
                 savedArticles.AddRange(readArticles);
                 savedArticles.AddRange(likedArticles);
 
-                var notificationPreferences = await notificationPreferenceService.GetNotificationPreferences(new List<int> { userId });
+                var notificationPreferences = await notificationPreferenceService.GetUserNotificationPreferencesAsync(new List<int> { userId });
                 var category = notificationPreferences.First()?.NewsCategories.Where(category => category.CategoryId == categoryId).FirstOrDefault();
 
                 if (category != null && category.Keywords.Any())
@@ -328,7 +317,7 @@ namespace NewsAggregationSystem.Service.Services
                     var keywords = category.Keywords.Where(keyword => keyword.IsEnabled)
                         .Select(keyword => keyword?.Name?.ToLower()).ToList();
 
-                    articles = savedArticles
+                    savedArticles = savedArticles
                         .OrderByDescending(article =>
                             keywords.Count(keyword =>
                                 (!string.IsNullOrEmpty(article.Title) && article.Title.ToLower().Contains(keyword)) ||

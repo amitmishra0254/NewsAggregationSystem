@@ -79,10 +79,10 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .ReturnsAsync(1);
 
             mockNotificationService
-                .Setup(service => service.NotifyAdminAboutReportedArticle(reportRequest, userId))
+                .Setup(service => service.NotifyAdminAboutReportedArticleAsync(reportRequest, userId))
                 .ReturnsAsync(1);
 
-            var result = await reportService.ReportNewsArticle(reportRequest, userId);
+            var result = await reportService.CreateArticleReportAsync(reportRequest, userId);
 
             Assert.AreEqual(1, result);
             mockReportRepository.Verify(repo => repo.AddAsync(It.Is<ReportedArticle>(r =>
@@ -91,7 +91,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 r.Reason == reportRequest.Reason &&
                 r.CreatedById == userId
             )), Times.Once);
-            mockNotificationService.Verify(service => service.NotifyAdminAboutReportedArticle(reportRequest, userId), Times.Once);
+            mockNotificationService.Verify(service => service.NotifyAdminAboutReportedArticleAsync(reportRequest, userId), Times.Once);
         }
 
         [Test]
@@ -109,11 +109,11 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .ReturnsAsync(false);
 
             var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
-                await reportService.ReportNewsArticle(reportRequest, userId));
+                await reportService.CreateArticleReportAsync(reportRequest, userId));
 
             Assert.IsTrue(exception.Message.Contains(reportRequest.ArticleId.ToString()));
             mockReportRepository.Verify(repo => repo.AddAsync(It.IsAny<ReportedArticle>()), Times.Never);
-            mockNotificationService.Verify(service => service.NotifyAdminAboutReportedArticle(It.IsAny<ReportRequestDTO>(), It.IsAny<int>()), Times.Never);
+            mockNotificationService.Verify(service => service.NotifyAdminAboutReportedArticleAsync(It.IsAny<ReportRequestDTO>(), It.IsAny<int>()), Times.Never);
         }
 
         [Test]
@@ -142,11 +142,11 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<System.Linq.Expressions.Expression<Func<ReportedArticle, bool>>>()))
                 .Returns(new List<ReportedArticle> { existingReport }.AsQueryable().BuildMockDbSet().Object);
 
-            var result = await reportService.ReportNewsArticle(reportRequest, userId);
+            var result = await reportService.CreateArticleReportAsync(reportRequest, userId);
 
             Assert.AreEqual(0, result);
             mockReportRepository.Verify(repo => repo.AddAsync(It.IsAny<ReportedArticle>()), Times.Never);
-            mockNotificationService.Verify(service => service.NotifyAdminAboutReportedArticle(It.IsAny<ReportRequestDTO>(), It.IsAny<int>()), Times.Never);
+            mockNotificationService.Verify(service => service.NotifyAdminAboutReportedArticleAsync(It.IsAny<ReportRequestDTO>(), It.IsAny<int>()), Times.Never);
         }
 
         [Test]
@@ -184,10 +184,10 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .ReturnsAsync(1);
 
             mockNotificationService
-                .Setup(service => service.NotifyAdminAboutReportedArticle(reportRequest, userId))
+                .Setup(service => service.NotifyAdminAboutReportedArticleAsync(reportRequest, userId))
                 .ReturnsAsync(1);
 
-            var result = await reportService.ReportNewsArticle(reportRequest, userId);
+            var result = await reportService.CreateArticleReportAsync(reportRequest, userId);
 
             Assert.AreEqual(1, result);
             mockReportRepository.Verify(repo => repo.AddAsync(It.Is<ReportedArticle>(r =>
@@ -243,10 +243,10 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .ReturnsAsync(1);
 
             mockNotificationService
-                .Setup(service => service.NotifyAdminAboutReportedArticle(reportRequest, userId))
+                .Setup(service => service.NotifyAdminAboutReportedArticleAsync(reportRequest, userId))
                 .ReturnsAsync(1);
 
-            var result = await reportService.ReportNewsArticle(reportRequest, userId);
+            var result = await reportService.CreateArticleReportAsync(reportRequest, userId);
 
             Assert.AreEqual(0, result);
             mockArticleService.Verify(service => service.HideArticle(It.IsAny<int>()), Times.Never);

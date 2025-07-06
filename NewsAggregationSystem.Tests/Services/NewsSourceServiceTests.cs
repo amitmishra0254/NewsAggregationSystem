@@ -78,7 +78,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
             mockRepository.Setup(repo => repo.GetAll()).Returns(newsSources.AsQueryable().BuildMockDbSet().Object);
             mockMapper.Setup(m => m.Map<List<NewsSourceDTO>>(newsSources)).Returns(newsSourceDTO);
 
-            var result = await newsSourceService.GetAll();
+            var result = await newsSourceService.GetAllNewsSourcesAsync();
 
             Assert.AreEqual(2, result.Count);
             mockMapper.Verify(m => m.Map<List<NewsSourceDTO>>(newsSources), Times.Once);
@@ -93,7 +93,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
             mockRepository.Setup(repo => repo.GetAll()).Returns(newsSources.AsQueryable().BuildMockDbSet().Object);
             mockMapper.Setup(m => m.Map<List<NewsSourceDTO>>(newsSources)).Returns(newsSourceDTO);
 
-            var result = await newsSourceService.GetAll();
+            var result = await newsSourceService.GetAllNewsSourcesAsync();
 
             Assert.AreEqual(0, result.Count);
         }
@@ -129,7 +129,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<NewsSource> { newsSources }.AsQueryable().BuildMockDbSet().Object);
             mockMapper.Setup(m => m.Map<NewsSourceDTO>(newsSources)).Returns(newsSourceDTO);
 
-            var result = await newsSourceService.GetById(id);
+            var result = await newsSourceService.GetNewsSourceByIdAsync(id);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(id, result.Id);
@@ -143,7 +143,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
             mockRepository.Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<NewsSource, bool>>>()))
                 .Returns(new List<NewsSource>().AsQueryable().BuildMockDbSet().Object);
 
-            var result = await newsSourceService.GetById(id);
+            var result = await newsSourceService.GetNewsSourceByIdAsync(id);
 
             Assert.IsNull(result);
         }
@@ -172,7 +172,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
             mockMapper.Setup(m => m.Map<NewsSource>(request)).Returns(newsSource);
             mockRepository.Setup(repo => repo.AddAsync(It.IsAny<NewsSource>())).ReturnsAsync(1);
 
-            await newsSourceService.Add(request, userId);
+            await newsSourceService.CreateNewsSourceAsync(request, userId);
 
             mockRepository.Verify(repo => repo.AddAsync(It.Is<NewsSource>(n =>
                 n.Name == request.Name &&
@@ -210,7 +210,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<NewsSource> { newsSource }.AsQueryable().BuildMockDbSet().Object);
             mockRepository.Setup(repo => repo.UpdateAsync(It.IsAny<NewsSource>())).ReturnsAsync(1);
 
-            await newsSourceService.Update(id, request, userId);
+            await newsSourceService.UpdateNewsSourceAsync(id, request, userId);
 
             mockRepository.Verify(repo => repo.UpdateAsync(It.Is<NewsSource>(n =>
                 n.ApiKey == request.ApiKey &&
@@ -234,7 +234,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<NewsSource>().AsQueryable().BuildMockDbSet().Object);
 
             var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
-                await newsSourceService.Update(id, request, userId));
+                await newsSourceService.UpdateNewsSourceAsync(id, request, userId));
 
             Assert.IsTrue(exception.Message.Contains(ApplicationConstants.NewsSourceNotFoundMessage));
         }
@@ -261,7 +261,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<NewsSource> { newsSource }.AsQueryable().BuildMockDbSet().Object);
             mockRepository.Setup(repo => repo.DeleteAsync(It.IsAny<NewsSource>())).ReturnsAsync(1);
 
-            await newsSourceService.Delete(id);
+            await newsSourceService.DeleteNewsSourceAsync(id);
 
             mockRepository.Verify(repo => repo.DeleteAsync(newsSource), Times.Once);
         }
@@ -275,7 +275,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<NewsSource>().AsQueryable().BuildMockDbSet().Object);
 
             var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
-                await newsSourceService.Delete(id));
+                await newsSourceService.DeleteNewsSourceAsync(id));
 
             Assert.IsTrue(exception.Message.Contains(ApplicationConstants.NewsSourceNotFoundMessage));
         }

@@ -123,6 +123,11 @@ namespace NewsAggregationSystem.API.Controllers
                 logger.LogInformation(ApplicationConstants.LogMessage.ArticleFetchedSuccessfully, Id, LoggedInUserId);
                 return Ok(article);
             }
+            catch (NotFoundException exception)
+            {
+                logger.LogError(exception, exception.Message);
+                return NotFound();
+            }
             catch (Exception exception)
             {
                 logger.LogError(exception, exception.Message);
@@ -130,7 +135,7 @@ namespace NewsAggregationSystem.API.Controllers
             }
         }
 
-        [HttpPost("{Id:int}/react-article{reactionId:int}"), Authorize(Roles = ApplicationConstants.UserOnly)]
+        [HttpPost("{Id:int}/react-article/{reactionId:int}"), Authorize(Roles = ApplicationConstants.UserOnly)]
         public async Task<IActionResult> ReactToArticle(int Id, int reactionId)
         {
             logger.LogInformation(ApplicationConstants.LogMessage.ReactingToArticle, LoggedInUserId, Id, reactionId);

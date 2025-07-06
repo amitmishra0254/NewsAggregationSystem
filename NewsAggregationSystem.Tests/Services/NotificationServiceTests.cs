@@ -66,7 +66,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddRangeAsync(It.IsAny<List<Notification>>()))
                 .ReturnsAsync(2);
 
-            var result = await notificationService.AddNotifications(notifications);
+            var result = await notificationService.CreateNotificationsAsync(notifications);
 
             Assert.AreEqual(2, result);
             mockNotificationRepository.Verify(repo => repo.AddRangeAsync(notifications), Times.Once);
@@ -114,7 +114,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(m => m.Map<List<NotificationDTO>>(It.IsAny<List<Notification>>()))
                 .Returns(notificationDtos);
 
-            var result = await notificationService.GetAllNotifications(userId);
+            var result = await notificationService.GetUserNotificationsAsync(userId);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count);
@@ -191,7 +191,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<Notification>()))
                 .ReturnsAsync(1);
 
-            var result = await notificationService.NotifyAdminAboutReportedArticle(report, userId);
+            var result = await notificationService.NotifyAdminAboutReportedArticleAsync(report, userId);
 
             Assert.AreEqual(1, result);
             mockNotificationRepository.Verify(repo => repo.AddAsync(It.Is<Notification>(n =>

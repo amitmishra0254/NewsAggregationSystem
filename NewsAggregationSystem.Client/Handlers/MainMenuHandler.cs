@@ -66,7 +66,7 @@ namespace NewsAggregationSystem.Client.Handlers
                     Password = password
                 };
 
-                var response = await authService.Login(loginRequest);
+                var response = await authService.AuthenticateUserAsync(loginRequest);
 
                 if (response != null)
                 {
@@ -101,7 +101,7 @@ namespace NewsAggregationSystem.Client.Handlers
                 Email = email,
                 Password = password
             };
-            await authService.Signup(signupRequest);
+            await authService.RegisterUserAsync(signupRequest);
         }
     }
 }

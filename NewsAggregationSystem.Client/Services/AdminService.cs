@@ -18,7 +18,7 @@ namespace NewsAggregationSystem.Client.Services
             this.jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         }
 
-        public async Task AddHiddenArticleKeywordAsync(string keyword)
+        public async Task AddKeywordToHideArticlesAsync(string keyword)
         {
             try
             {

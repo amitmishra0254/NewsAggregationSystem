@@ -38,7 +38,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<NewsCategory>()))
                 .ReturnsAsync(1);
 
-            var result = await newsCategoryService.AddNewsCategory(name, userId);
+            var result = await newsCategoryService.CreateNewsCategoryAsync(name, userId);
 
             Assert.AreEqual(0, result);
             mockNewsCategoryRepository.Verify(repo => repo.AddAsync(It.Is<NewsCategory>(c =>
@@ -60,7 +60,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<NewsCategory> { existingCategory }.AsQueryable().BuildMockDbSet().Object);
 
             var exception = Assert.ThrowsAsync<AlreadyExistException>(async () =>
-                await newsCategoryService.AddNewsCategory(name, userId));
+                await newsCategoryService.CreateNewsCategoryAsync(name, userId));
 
             Assert.IsTrue(exception.Message.Contains(name));
         }
@@ -89,7 +89,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.UpdateAsync(It.IsAny<NewsCategory>()))
                 .ReturnsAsync(1);
 
-            var result = await newsCategoryService.ToggleVisibility(categoryId, isHidden);
+            var result = await newsCategoryService.ToggleCategoryVisibilityAsync(categoryId, isHidden);
 
             Assert.AreEqual(1, result);
             mockNewsCategoryRepository.Verify(repo => repo.UpdateAsync(It.Is<NewsCategory>(c =>
@@ -109,7 +109,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<NewsCategory>().AsQueryable().BuildMockDbSet().Object);
 
             var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
-                await newsCategoryService.ToggleVisibility(categoryId, isHidden));
+                await newsCategoryService.ToggleCategoryVisibilityAsync(categoryId, isHidden));
 
             Assert.IsTrue(exception.Message.Contains(categoryId.ToString()));
         }
@@ -130,7 +130,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<NewsCategory, bool>>>()))
                 .Returns(new List<NewsCategory> { existingCategory }.AsQueryable().BuildMockDbSet().Object);
 
-            var result = await newsCategoryService.ToggleVisibility(categoryId, isHidden);
+            var result = await newsCategoryService.ToggleCategoryVisibilityAsync(categoryId, isHidden);
 
             Assert.AreEqual(0, result);
             mockNewsCategoryRepository.Verify(repo => repo.UpdateAsync(It.IsAny<NewsCategory>()), Times.Never);
@@ -156,7 +156,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<NewsCategory, bool>>>()))
                 .Returns(categories.AsQueryable().BuildMockDbSet().Object);
 
-            var result = await newsCategoryService.GetAllCategories(userRole);
+            var result = await newsCategoryService.GetAllNewsCategoriesAsync(userRole);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(3, result.Count);
@@ -178,7 +178,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<NewsCategory, bool>>>()))
                 .Returns(categories.AsQueryable().BuildMockDbSet().Object);
 
-            var result = await newsCategoryService.GetAllCategories(userRole);
+            var result = await newsCategoryService.GetAllNewsCategoriesAsync(userRole);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(3, result.Count);
@@ -199,7 +199,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<NewsCategory, bool>>>()))
                 .Returns(categories.AsQueryable().BuildMockDbSet().Object);
 
-            var result = await newsCategoryService.GetAllCategories(userRole);
+            var result = await newsCategoryService.GetAllNewsCategoriesAsync(userRole);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count);

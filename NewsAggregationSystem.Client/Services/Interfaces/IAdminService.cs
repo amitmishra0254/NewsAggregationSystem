@@ -2,6 +2,6 @@
 {
     public interface IAdminService
     {
-        Task AddHiddenArticleKeywordAsync(string keyword);
+        Task AddKeywordToHideArticlesAsync(string keyword);
     }
 }

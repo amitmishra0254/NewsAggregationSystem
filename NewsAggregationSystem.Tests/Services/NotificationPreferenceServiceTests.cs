@@ -175,7 +175,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<System.Linq.Expressions.Expression<Func<UserNewsKeyword, bool>>>()))
                 .Returns(keywords.AsQueryable().BuildMockDbSet().Object);
 
-            var result = await notificationPreferenceService.GetNotificationPreferences(userIds);
+            var result = await notificationPreferenceService.GetUserNotificationPreferencesAsync(userIds);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count);
@@ -218,7 +218,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<System.Linq.Expressions.Expression<Func<UserNewsKeyword, bool>>>()))
                 .Returns(keywords.AsQueryable().BuildMockDbSet().Object);
 
-            var result = await notificationPreferenceService.GetNotificationPreferences(userIds);
+            var result = await notificationPreferenceService.GetUserNotificationPreferencesAsync(userIds);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
@@ -243,7 +243,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<UserNewsKeyword>()))
                 .ReturnsAsync(1);
 
-            var result = await notificationPreferenceService.AddKeyword(keyword, categoryId, userId);
+            var result = await notificationPreferenceService.AddKeywordToCategoryAsync(keyword, categoryId, userId);
 
             Assert.AreEqual(1, result);
             mockUserNewsKeywordRepository.Verify(repo => repo.AddAsync(It.Is<UserNewsKeyword>(k =>
@@ -275,7 +275,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<UserNewsKeyword> { existingKeyword }.AsQueryable().BuildMockDbSet().Object);
 
             var exception = Assert.ThrowsAsync<AlreadyExistException>(async () =>
-                await notificationPreferenceService.AddKeyword(keyword, categoryId, userId));
+                await notificationPreferenceService.AddKeywordToCategoryAsync(keyword, categoryId, userId));
 
             Assert.IsTrue(exception.Message.Contains(keyword));
         }
@@ -307,7 +307,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.UpdateAsync(It.IsAny<UserNewsKeyword>()))
                 .ReturnsAsync(1);
 
-            var result = await notificationPreferenceService.ChangeKeywordStatus(keywordId, isEnable);
+            var result = await notificationPreferenceService.UpdateKeywordStatusAsync(keywordId, isEnable);
 
             Assert.AreEqual(1, result);
             Assert.AreEqual(isEnable, existingKeyword.IsEnabled);
@@ -325,7 +325,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<UserNewsKeyword>().AsQueryable().BuildMockDbSet().Object);
 
             var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
-                await notificationPreferenceService.ChangeKeywordStatus(keywordId, isEnable));
+                await notificationPreferenceService.UpdateKeywordStatusAsync(keywordId, isEnable));
 
             Assert.IsTrue(exception.Message.Contains(ApplicationConstants.KeywordNotFoundWithThisId));
         }
@@ -357,7 +357,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.UpdateAsync(It.IsAny<NotificationPreference>()))
                 .ReturnsAsync(1);
 
-            var result = await notificationPreferenceService.ChangeCategoryStatus(categoryId, isEnable, userId);
+            var result = await notificationPreferenceService.UpdateCategoryStatusAsync(categoryId, isEnable, userId);
 
             Assert.AreEqual(1, result);
             Assert.AreEqual(isEnable, existingPreference.IsEnabled);
@@ -376,7 +376,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<NotificationPreference>().AsQueryable().BuildMockDbSet().Object);
 
             var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
-                await notificationPreferenceService.ChangeCategoryStatus(categoryId, isEnable, userId));
+                await notificationPreferenceService.UpdateCategoryStatusAsync(categoryId, isEnable, userId));
 
             Assert.IsTrue(exception.Message.Contains(ApplicationConstants.KeywordNotFoundWithThisId));
         }

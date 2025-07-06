@@ -55,7 +55,7 @@ namespace NewsAggregationSystem.Service.Services
 
             resolvedCategory = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(resolvedCategory.ToLower());
 
-            var newCategoryId = await newsCategoryService.AddNewsCategory(resolvedCategory, ApplicationConstants.SystemUserId);
+            var newCategoryId = await newsCategoryService.CreateNewsCategoryAsync(resolvedCategory, ApplicationConstants.SystemUserId);
             await notificationPreferenceService.AddNotificationPreferencesPerCategory(newCategoryId);
             return newCategoryId;
         }

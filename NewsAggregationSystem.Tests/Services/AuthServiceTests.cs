@@ -113,7 +113,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<UserRole, bool>>>()))
                 .Returns(userRoles.AsQueryable().BuildMockDbSet().Object);
 
-            var result = await authService.Login(loginRequest);
+            var result = await authService.AuthenticateUserAsync(loginRequest);
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.AccessToken);
@@ -176,7 +176,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(userRoles.AsQueryable().BuildMockDbSet().Object);
 
 
-            var result = await authService.Login(loginRequest);
+            var result = await authService.AuthenticateUserAsync(loginRequest);
 
             Assert.IsNotNull(result);
             Assert.AreEqual($"{UserRoles.User},{UserRoles.Admin}", result.Roles);
@@ -197,7 +197,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<User>().AsQueryable().BuildMockDbSet().Object);
 
 
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () => await authService.Login(loginRequest));
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () => await authService.AuthenticateUserAsync(loginRequest));
             Assert.IsTrue(exception.Message.Contains(loginRequest.Email));
         }
 
@@ -226,7 +226,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<User> { user }.AsQueryable().BuildMockDbSet().Object);
 
 
-            var exception = Assert.ThrowsAsync<InvalidCredentialsException>(async () => await authService.Login(loginRequest));
+            var exception = Assert.ThrowsAsync<InvalidCredentialsException>(async () => await authService.AuthenticateUserAsync(loginRequest));
             Assert.IsTrue(exception.Message.Contains(ApplicationConstants.InvalidPassword));
         }
 
@@ -277,7 +277,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
             var jwtSection = new Mock<IConfigurationSection>();
             jwtSection.Setup(x => x.Value).Returns("JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore12345678901234567890");
 
-            var result = await authService.Login(loginRequest);
+            var result = await authService.AuthenticateUserAsync(loginRequest);
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.AccessToken);
@@ -334,7 +334,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(userRoles.AsQueryable().BuildMockDbSet().Object);
 
 
-            var result = await authService.Login(loginRequest);
+            var result = await authService.AuthenticateUserAsync(loginRequest);
 
 
             mockHttpResponse.Verify(x => x.Cookies.Append(
@@ -385,7 +385,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<UserRole, bool>>>()))
                 .Returns(userRoles.AsQueryable().BuildMockDbSet().Object);
 
-            var result = await authService.Login(loginRequest);
+            var result = await authService.AuthenticateUserAsync(loginRequest);
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.AccessToken);
@@ -430,7 +430,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(userRoles.AsQueryable().BuildMockDbSet().Object);
 
 
-            var result = await authService.Login(loginRequest);
+            var result = await authService.AuthenticateUserAsync(loginRequest);
 
 
             Assert.IsNotNull(result);
@@ -458,7 +458,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<User>().AsQueryable().BuildMockDbSet().Object);
 
 
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () => await authService.Login(loginRequest));
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () => await authService.AuthenticateUserAsync(loginRequest));
             Assert.IsTrue(exception.Message.Contains(loginRequest.Email));
         }
 
@@ -487,7 +487,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<User> { user }.AsQueryable().BuildMockDbSet().Object);
 
 
-            var exception = Assert.ThrowsAsync<InvalidCredentialsException>(async () => await authService.Login(loginRequest));
+            var exception = Assert.ThrowsAsync<InvalidCredentialsException>(async () => await authService.AuthenticateUserAsync(loginRequest));
             Assert.IsTrue(exception.Message.Contains(ApplicationConstants.InvalidPassword));
         }
 
@@ -531,7 +531,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
 
             mockHttpContextAccessor.Setup(x => x.HttpContext).Returns((HttpContext)null);
 
-            Assert.ThrowsAsync<NullReferenceException>(async () => await authService.Login(loginRequest));
+            Assert.ThrowsAsync<NullReferenceException>(async () => await authService.AuthenticateUserAsync(loginRequest));
         }
 
         #region Private Helper Methods

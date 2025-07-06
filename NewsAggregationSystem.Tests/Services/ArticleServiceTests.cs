@@ -124,7 +124,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.DeleteAsync(savedArticle))
                 .ReturnsAsync(1);
 
-            var result = await articleService.DeleteSavedArticles(articleId, userId);
+            var result = await articleService.DeleteUserSavedArticleAsync(articleId, userId);
 
             Assert.AreEqual(1, result);
             mockSavedArticleRepository.Verify(r => r.DeleteAsync(savedArticle), Times.Once);
@@ -152,7 +152,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<SavedArticle, bool>>>()))
                 .Returns(mockSavedArticleDbSet.Object);
 
-            var result = await articleService.DeleteSavedArticles(articleId, userId);
+            var result = await articleService.DeleteUserSavedArticleAsync(articleId, userId);
 
             Assert.AreEqual(0, result);
             mockSavedArticleRepository.Verify(r => r.DeleteAsync(It.IsAny<SavedArticle>()), Times.Never);
@@ -205,7 +205,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                     }
                 });
 
-            var result = await articleService.GetAllSavedArticles(userId);
+            var result = await articleService.GetUserSavedArticlesAsync(userId);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
@@ -226,7 +226,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<SavedArticle, bool>>>()))
                 .Returns(mockDbSet.Object);
 
-            var result = await articleService.GetAllSavedArticles(userId);
+            var result = await articleService.GetUserSavedArticlesAsync(userId);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
@@ -251,7 +251,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(mapper => mapper.Map<ArticleDTO>(article))
                 .Returns(expectedDto);
 
-            var actualResult = await articleService.GetArticleById(articleId, userId);
+            var actualResult = await articleService.GetUserArticleByIdAsync(articleId, userId);
 
             AssertArticleDTOProperties(actualResult, expectedDto);
             VerifyReadHistoryWasAdded(articleId, userId);
@@ -267,7 +267,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetArticleById(articleId, userId))
                 .ReturnsAsync((Article)null);
 
-            Assert.ThrowsAsync<NotFoundException>(() => articleService.GetArticleById(articleId, userId));
+            Assert.ThrowsAsync<NotFoundException>(() => articleService.GetUserArticleByIdAsync(articleId, userId));
 
             mockMapper.Verify(m => m.Map<ArticleDTO>(It.IsAny<Article>()), Times.Never);
             mockArticleReadHistoryRepository.Verify(r => r.AddAsync(It.IsAny<ArticleReadHistory>()), Times.Never);
@@ -300,7 +300,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<ArticleReaction>()))
                 .ReturnsAsync(1);
 
-            var result = await articleService.ReactArticle(articleId, userId, reactionId);
+            var result = await articleService.ReactToArticleAsync(articleId, userId, reactionId);
 
             Assert.AreEqual(1, result);
 
@@ -325,7 +325,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<Article, bool>>>()))
                 .Returns(emptyArticleList.Object);
 
-            Assert.ThrowsAsync<NotFoundException>(() => articleService.ReactArticle(articleId, userId, reactionId));
+            Assert.ThrowsAsync<NotFoundException>(() => articleService.ReactToArticleAsync(articleId, userId, reactionId));
             mockArticleReactionRepository.Verify(repo => repo.AddAsync(It.IsAny<ArticleReaction>()), Times.Never);
         }
 
@@ -353,7 +353,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.UpdateAsync(It.IsAny<Article>()))
                 .ReturnsAsync(1);
 
-            var result = await articleService.ToggleVisibility(articleId, userId, newIsHidden);
+            var result = await articleService.ToggleArticleVisibilityAsync(articleId, userId, newIsHidden);
 
             Assert.AreEqual(1, result);
 
@@ -378,7 +378,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<Article, bool>>>()))
                 .Returns(emptyArticleList.Object);
 
-            Assert.ThrowsAsync<NotFoundException>(() => articleService.ToggleVisibility(articleId, userId, newIsHidden));
+            Assert.ThrowsAsync<NotFoundException>(() => articleService.ToggleArticleVisibilityAsync(articleId, userId, newIsHidden));
 
             mockArticleRepository.Verify(repo => repo.UpdateAsync(It.IsAny<Article>()), Times.Never);
         }
@@ -402,7 +402,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<Article, bool>>>()))
                 .Returns(articleList.Object);
 
-            var result = await articleService.ToggleVisibility(articleId, userId, newIsHidden);
+            var result = await articleService.ToggleArticleVisibilityAsync(articleId, userId, newIsHidden);
 
             Assert.AreEqual(0, result);
             mockArticleRepository.Verify(repo => repo.UpdateAsync(It.IsAny<Article>()), Times.Never);
@@ -427,7 +427,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.AddAsync(It.IsAny<SavedArticle>()))
                 .ReturnsAsync(1);
 
-            var result = await articleService.SaveArticle(articleId, userId);
+            var result = await articleService.SaveUserArticleAsync(articleId, userId);
 
             Assert.AreEqual(1, result);
 
@@ -449,7 +449,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<Article, bool>>>()))
                 .Returns(new List<Article>().AsQueryable().BuildMockDbSet().Object);
 
-            Assert.ThrowsAsync<NotFoundException>(() => articleService.SaveArticle(articleId, userId));
+            Assert.ThrowsAsync<NotFoundException>(() => articleService.SaveUserArticleAsync(articleId, userId));
 
             mockSavedArticleRepository.Verify(repo => repo.AddAsync(It.IsAny<SavedArticle>()), Times.Never);
         }
@@ -471,7 +471,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<SavedArticle, bool>>>()))
                 .Returns(new List<SavedArticle> { savedArticle }.AsQueryable().BuildMockDbSet().Object);
 
-            var result = await articleService.SaveArticle(articleId, userId);
+            var result = await articleService.SaveUserArticleAsync(articleId, userId);
 
             Assert.AreEqual(0, result);
             mockSavedArticleRepository.Verify(repo => repo.AddAsync(It.IsAny<SavedArticle>()), Times.Never);
@@ -572,7 +572,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
             mockArticleRepository.Setup(x => x.GetMostReadCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.Is<List<int>>(ids => ids.Contains(userId))))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.Is<List<int>>(ids => ids.Contains(userId))))
                 .ReturnsAsync(notificationPreferences);
 
             var result = await mockArticleService.Object.GetRecommendedArticles(userId, articles);
@@ -622,7 +622,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
             mockArticleRepository.Setup(x => x.GetMostReadCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.Is<List<int>>(ids => ids.Contains(userId))))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.Is<List<int>>(ids => ids.Contains(userId))))
                 .ReturnsAsync(notificationPreferences);
 
             var result = await mockArticleService.Object.GetRecommendedArticles(userId, articles);
@@ -667,7 +667,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
             mockArticleRepository.Setup(x => x.GetMostReadCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.Is<List<int>>(ids => ids.Contains(userId))))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.Is<List<int>>(ids => ids.Contains(userId))))
                 .ReturnsAsync(notificationPreferences);
 
             var result = await mockArticleService.Object.GetRecommendedArticles(userId, articles);
@@ -725,7 +725,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                     new ArticleDTO { Id = 1, Title = "AI and Future" }
                 });
 
-            var result = await articleService.GetAllArticles(request, userId);
+            var result = await articleService.GetUserArticlesAsync(request, userId);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
@@ -788,7 +788,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(hiddenKeywords.AsQueryable().BuildMockDbSet().Object);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(notificationPreferences);
 
             mockArticleRepository
@@ -807,7 +807,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(m => m.Map<List<ArticleDTO>>(It.IsAny<List<Article>>()))
                 .Returns(new List<ArticleDTO> { new ArticleDTO { Id = 2, Title = "AI Today" } });
 
-            var result = await articleService.GetAllArticles(request, userId);
+            var result = await articleService.GetUserArticlesAsync(request, userId);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
@@ -872,7 +872,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(hiddenKeywords.AsQueryable().BuildMockDbSet().Object);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(notificationPreferences);
 
             mockArticleRepository
@@ -891,7 +891,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(m => m.Map<List<ArticleDTO>>(It.IsAny<List<Article>>()))
                 .Returns(new List<ArticleDTO> { new ArticleDTO { Id = 5, Title = "Filtered News" } });
 
-            var result = await articleService.GetAllArticles(request, userId);
+            var result = await articleService.GetUserArticlesAsync(request, userId);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
@@ -959,7 +959,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(hiddenKeywords.AsQueryable().BuildMockDbSet().Object);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(notificationPreferences);
 
             mockArticleRepository
@@ -978,7 +978,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(m => m.Map<List<ArticleDTO>>(It.IsAny<List<Article>>()))
                 .Returns(new List<ArticleDTO> { new ArticleDTO { Id = 10, Title = "Climate Change Updates" } });
 
-            var result = await articleService.GetAllArticles(request, userId);
+            var result = await articleService.GetUserArticlesAsync(request, userId);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
@@ -1022,7 +1022,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(hiddenKeywords.AsQueryable().BuildMockDbSet().Object);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(notificationPreferences);
 
             mockArticleRepository
@@ -1041,7 +1041,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(m => m.Map<List<ArticleDTO>>(It.IsAny<List<Article>>()))
                 .Returns(new List<ArticleDTO>());
 
-            var result = await articleService.GetAllArticles(request, userId);
+            var result = await articleService.GetUserArticlesAsync(request, userId);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
@@ -1104,7 +1104,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(hiddenKeywords.AsQueryable().BuildMockDbSet().Object);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(notificationPreferences);
 
             mockArticleRepository
@@ -1123,7 +1123,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(m => m.Map<List<ArticleDTO>>(It.IsAny<List<Article>>()))
                 .Returns(new List<ArticleDTO>());
 
-            var result = await articleService.GetAllArticles(request, userId);
+            var result = await articleService.GetUserArticlesAsync(request, userId);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
@@ -1177,7 +1177,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(hiddenKeywords.AsQueryable().BuildMockDbSet().Object);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(notificationPreferences);
 
             mockArticleRepository.Setup(x => x.GetMostLikedCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
@@ -1189,7 +1189,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(new List<ArticleDTO>());
 
 
-            var result = await articleService.GetAllArticles(request, userId);
+            var result = await articleService.GetUserArticlesAsync(request, userId);
 
 
             Assert.IsNotNull(result);
@@ -1230,7 +1230,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.UpdateAsync(It.IsAny<ArticleReaction>()))
                 .ReturnsAsync(1);
 
-            var result = await articleService.ReactArticle(articleId, userId, newReactionId);
+            var result = await articleService.ReactToArticleAsync(articleId, userId, newReactionId);
 
             Assert.AreEqual(1, result);
 
@@ -1272,7 +1272,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(repo => repo.GetWhere(It.IsAny<Expression<Func<ArticleReaction, bool>>>()))
                 .Returns(reactionList.Object);
 
-            var result = await articleService.ReactArticle(articleId, userId, reactionId);
+            var result = await articleService.ReactToArticleAsync(articleId, userId, reactionId);
 
             Assert.AreEqual(0, result);
 
@@ -1346,7 +1346,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(hiddenKeywords.AsQueryable().BuildMockDbSet().Object);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(notificationPreferences);
 
             mockArticleRepository
@@ -1365,7 +1365,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(m => m.Map<List<ArticleDTO>>(It.IsAny<List<Article>>()))
                 .Returns((List<Article> input) => input.Select(a => new ArticleDTO { Id = a.Id, Title = a.Title }).ToList());
 
-            var result = await articleService.GetAllArticles(request, userId);
+            var result = await articleService.GetUserArticlesAsync(request, userId);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
@@ -1425,7 +1425,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(hiddenKeywords.AsQueryable().BuildMockDbSet().Object);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(notificationPreferences);
 
             mockArticleRepository
@@ -1444,10 +1444,10 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(m => m.Map<List<ArticleDTO>>(It.IsAny<List<Article>>()))
                 .Returns((List<Article> input) => input.Select(a => new ArticleDTO { Id = a.Id, Title = a.Title }).ToList());
 
-            var result = await articleService.GetAllArticles(request, userId);
+            var result = await articleService.GetUserArticlesAsync(request, userId);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Count);
+            Assert.AreEqual(2, result.Count);
         }
 
         [Test]
@@ -1524,7 +1524,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Returns(hiddenKeywords.AsQueryable().BuildMockDbSet().Object);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(notificationPreferences);
 
             mockArticleRepository
@@ -1543,10 +1543,10 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .Setup(m => m.Map<List<ArticleDTO>>(It.IsAny<List<Article>>()))
                 .Returns((List<Article> input) => input.Select(a => new ArticleDTO { Id = a.Id, Title = a.Title }).ToList());
 
-            var result = await articleService.GetAllArticles(request, userId);
+            var result = await articleService.GetUserArticlesAsync(request, userId);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Count);
+            Assert.AreEqual(2, result.Count);
         }
 
         [Test]
@@ -1601,7 +1601,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
             mockArticleRepository.Setup(x => x.GetMostReadCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(notificationPreferences);
 
             var result = await articleService.GetRecommendedArticles(userId, articles);
@@ -1651,7 +1651,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
             mockArticleRepository.Setup(x => x.GetMostReadCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(notificationPreferences);
 
             var result = await articleService.GetRecommendedArticles(userId, articles);
@@ -1695,7 +1695,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
             mockArticleRepository.Setup(x => x.GetMostReadCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(notificationPreferences);
 
             var result = await articleService.GetRecommendedArticles(userId, articles);
@@ -1741,7 +1741,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
             mockArticleRepository.Setup(x => x.GetMostReadCategory(userId)).ReturnsAsync((CategoryRecommendationDTO)null!);
 
             mockNotificationPreferenceService
-                .Setup(x => x.GetNotificationPreferences(It.IsAny<List<int>>()))
+                .Setup(x => x.GetUserNotificationPreferencesAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(notificationPreferences);
 
             var result = await articleService.GetRecommendedArticles(userId, articles);

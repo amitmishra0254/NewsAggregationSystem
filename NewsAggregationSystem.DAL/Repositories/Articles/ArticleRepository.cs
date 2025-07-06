@@ -17,7 +17,7 @@ namespace NewsAggregationSystem.DAL.Repositories.Articles
 
         public async Task<Article> GetArticleById(int Id, int userId)
         {
-            var article = await context.Articles.Where(article => article.Id == Id)
+            var article = await context.Articles.Where(article => article.Id == Id && !article.IsHidden)
                             .Include(article => article.NewsCategory)
                             .FirstOrDefaultAsync();
             return article;
@@ -32,7 +32,7 @@ namespace NewsAggregationSystem.DAL.Repositories.Articles
                 .Select(g => new CategoryRecommendationDTO
                 {
                     CategoryId = g.Key,
-                    Count = g.Count(),
+                    Count = g.Count() + 1,
                     Keywords = new()
                 })
                 .OrderByDescending(g => g.Count)
@@ -48,7 +48,7 @@ namespace NewsAggregationSystem.DAL.Repositories.Articles
                 .Select(g => new CategoryRecommendationDTO
                 {
                     CategoryId = g.Key,
-                    Count = g.Count(),
+                    Count = g.Count() + 1,
                     Keywords = new()
                 })
                 .OrderByDescending(g => g.Count)
@@ -64,7 +64,7 @@ namespace NewsAggregationSystem.DAL.Repositories.Articles
                 .Select(g => new CategoryRecommendationDTO
                 {
                     CategoryId = g.Key,
-                    Count = g.Count(),
+                    Count = g.Count() + 1,
                     Keywords = new()
                 })
                 .OrderByDescending(g => g.Count)

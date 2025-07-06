@@ -34,7 +34,7 @@ namespace NewsAggregationSystem.Client.Services
             }
         }
 
-        public async Task ToggleCategoryVisibilityAsync(int categoryId, bool isHidden)
+        public async Task ToggleNewsCategoryVisibilityAsync(int categoryId, bool isHidden)
         {
             try
             {
@@ -105,8 +105,8 @@ namespace NewsAggregationSystem.Client.Services
         {
             if (response.IsSuccessStatusCode)
             {
-                var message = isHidden 
-                    ? ApplicationConstants.LogMessage.CategoryHiddenSuccessfully 
+                var message = isHidden
+                    ? ApplicationConstants.LogMessage.CategoryHiddenSuccessfully
                     : ApplicationConstants.LogMessage.CategoryUnhiddenSuccessfully;
                 DisplaySuccessMessage(message);
                 return;
@@ -133,7 +133,7 @@ namespace NewsAggregationSystem.Client.Services
             if (response.IsSuccessStatusCode)
             {
                 var responseString = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<List<NotificationPreferencesKeywordDTO>>(responseString, jsonOptions) 
+                return JsonSerializer.Deserialize<List<NotificationPreferencesKeywordDTO>>(responseString, jsonOptions)
                     ?? new List<NotificationPreferencesKeywordDTO>();
             }
 

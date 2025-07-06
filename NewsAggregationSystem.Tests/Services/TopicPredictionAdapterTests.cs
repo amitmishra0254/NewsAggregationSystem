@@ -126,7 +126,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
             var result = await topicPredictionAdapter.ResolveCategory(categoryName);
 
             Assert.AreEqual(existingCategory.Id, result);
-            mockNewsCategoryService.Verify(service => service.AddNewsCategory(It.IsAny<string>(), It.IsAny<int>()), Times.Never);
+            mockNewsCategoryService.Verify(service => service.CreateNewsCategoryAsync(It.IsAny<string>(), It.IsAny<int>()), Times.Never);
             mockNotificationPreferenceService.Verify(service => service.AddNotificationPreferencesPerCategory(It.IsAny<int>()), Times.Never);
         }
 
@@ -142,7 +142,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
                 .ReturnsAsync((NewsCategory)null);
 
             mockNewsCategoryService
-                .Setup(service => service.AddNewsCategory(titleCaseCategoryName, ApplicationConstants.SystemUserId))
+                .Setup(service => service.CreateNewsCategoryAsync(titleCaseCategoryName, ApplicationConstants.SystemUserId))
                 .ReturnsAsync(newCategoryId);
 
             mockNotificationPreferenceService
@@ -152,7 +152,7 @@ namespace NewsAggregationSystem.Service.Tests.Services
             var result = await topicPredictionAdapter.ResolveCategory(categoryName);
 
             Assert.AreEqual(newCategoryId, result);
-            mockNewsCategoryService.Verify(service => service.AddNewsCategory(titleCaseCategoryName, ApplicationConstants.SystemUserId), Times.Once);
+            mockNewsCategoryService.Verify(service => service.CreateNewsCategoryAsync(titleCaseCategoryName, ApplicationConstants.SystemUserId), Times.Once);
             mockNotificationPreferenceService.Verify(service => service.AddNotificationPreferencesPerCategory(newCategoryId), Times.Once);
         }
 
