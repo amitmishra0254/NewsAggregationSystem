@@ -42,6 +42,7 @@
             public const string ResolvedCategory = "Resolved category ID {CategoryId} for article: {Title}";
             public const string ProcessingArticle = "Processing article: {Title}";
             public const string FetchingNewsStarted = "Started fetching news from source ID {NewsSourceId} for country: {Country}, category: {Category}";
+            public const string FetchingNewsCompleted = "Successfully fetched {Count} articles from {AdapterName}";
             public const string NewsSourceNotFound = "News source with ID {NewsSourceId} not found.";
             public const string SendingRequestToApi = "Sending request to API: {Url}";
             public const string ApiResponseStatus = "Received response with status code: {StatusCode} from source ID {NewsSourceId}";
