@@ -30,7 +30,7 @@ namespace NewsAggregationSystem.Service.Services
             this.userRoleRepository = userRoleRepository;
         }
 
-        public async Task<int> ReportNewsArticle(ReportRequestDTO reportRequest, int userId)
+        public async Task<int> CreateArticleReportAsync(ReportRequestDTO reportRequest, int userId)
         {
             if (!await articleService.IsNewsArticleExist(reportRequest.ArticleId))
             {
@@ -61,7 +61,7 @@ namespace NewsAggregationSystem.Service.Services
                     CreatedDate = dateTimeHelper.CurrentUtcDateTime
                 });
 
-                return await notificationService.NotifyAdminAboutReportedArticle(reportRequest, userId);
+                return await notificationService.NotifyAdminAboutReportedArticleAsync(reportRequest, userId);
             }
             return 0;
         }

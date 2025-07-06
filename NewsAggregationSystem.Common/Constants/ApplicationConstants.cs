@@ -78,6 +78,11 @@
             public const string KeywordStatusUpdated = "Keyword status updated successfully. Keyword ID: {KeywordId}, Enable: {IsEnable}.";
             public const string ChangingCategoryStatus = "User {UserId} is attempting to change category status. Category ID: {CategoryId}, Enable: {IsEnable}.";
             public const string CategoryStatusUpdated = "Category status updated successfully. Category ID: {CategoryId}, Enable: {IsEnable}, User ID: {UserId}.";
+            
+            // Reports related messages
+            public const string CreatingArticleReport = "User {UserId} is attempting to report article ID: {ArticleId} with reason: {Reason}";
+            public const string ArticleReportCreated = "Article ID: {ArticleId} reported successfully by user ID: {UserId}";
+            public const string ArticleAlreadyReported = "Article ID: {ArticleId} has already been reported by user ID: {UserId}";
         }
 
 
