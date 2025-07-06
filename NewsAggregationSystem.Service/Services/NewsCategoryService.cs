@@ -21,7 +21,7 @@ namespace NewsAggregationSystem.Service.Services
             this.newsCategoryRepository = newsCategoryRepository;
         }
 
-        public async Task<int> AddNewsCategory(string name, int userId)
+        public async Task<int> CreateNewsCategoryAsync(string name, int userId)
         {
             if (await newsCategoryRepository.GetWhere(newsCategory => newsCategory.Name.ToLower() == name.ToLower()).AnyAsync())
             {
@@ -37,7 +37,7 @@ namespace NewsAggregationSystem.Service.Services
             return newsCategory.Id;
         }
 
-        public async Task<int> ToggleVisibility(int categoryId, bool IsHidden)
+        public async Task<int> ToggleCategoryVisibilityAsync(int categoryId, bool IsHidden)
         {
             var existingCategory = await newsCategoryRepository.GetWhere(newsCategory => newsCategory.Id == categoryId)
                 .FirstOrDefaultAsync();
@@ -56,7 +56,7 @@ namespace NewsAggregationSystem.Service.Services
             }
         }
 
-        public async Task<List<NotificationPreferencesKeywordDTO>> GetAllCategories(string userRole)
+        public async Task<List<NotificationPreferencesKeywordDTO>> GetAllNewsCategoriesAsync(string userRole)
         {
             Expression<Func<NewsCategory, bool>> expression = expression => true;
 

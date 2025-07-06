@@ -23,15 +23,15 @@ namespace NewsAggregationSystem.API.Controllers
 
         [Authorize(Roles = ApplicationConstants.AdminOnly)]
         [HttpPost]
-        public async Task<IActionResult> Add([FromQuery] string category)
+        public async Task<IActionResult> CreateNewsCategory([FromQuery] string category)
         {
             logger.LogInformation(ApplicationConstants.LogMessage.AddingNewsCategory, category, LoggedInUserId);
             try
             {
-                var newsCategoryId = await newsCategoryService.AddNewsCategory(category, LoggedInUserId);
+                var newsCategoryId = await newsCategoryService.CreateNewsCategoryAsync(category, LoggedInUserId);
                 await notificationPreferenceService.AddNotificationPreferencesPerCategory(newsCategoryId);
                 logger.LogInformation(ApplicationConstants.LogMessage.NewsCategoryAddedSuccessfully, category, newsCategoryId, LoggedInUserId);
-                return CreatedAtAction(nameof(Add), newsCategoryId);
+                return CreatedAtAction(nameof(CreateNewsCategory), newsCategoryId);
             }
             catch (AlreadyExistException exception)
             {
@@ -47,12 +47,12 @@ namespace NewsAggregationSystem.API.Controllers
 
         [Authorize(Roles = ApplicationConstants.AdminOnly)]
         [HttpPost("toggle-visibility")]
-        public async Task<IActionResult> ToggleVisibility([FromQuery] int categoryId, [FromQuery] bool IsHidden)
+        public async Task<IActionResult> ToggleCategoryVisibility([FromQuery] int categoryId, [FromQuery] bool IsHidden)
         {
             logger.LogInformation(ApplicationConstants.LogMessage.TogglingNewsCategoryVisibility, categoryId, IsHidden);
             try
             {
-                var response = await newsCategoryService.ToggleVisibility(categoryId, IsHidden);
+                var response = await newsCategoryService.ToggleCategoryVisibilityAsync(categoryId, IsHidden);
                 if (response == 0)
                 {
                     return BadRequest();
@@ -76,12 +76,12 @@ namespace NewsAggregationSystem.API.Controllers
 
         [Authorize(Roles = ApplicationConstants.AdminOnly)]
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAllNewsCategories()
         {
             logger.LogInformation(ApplicationConstants.LogMessage.FetchingAllNewsCategories, LoggedInUserRole);
             try
             {
-                var categories = await newsCategoryService.GetAllCategories(LoggedInUserRole);
+                var categories = await newsCategoryService.GetAllNewsCategoriesAsync(LoggedInUserRole);
 
                 logger.LogInformation(ApplicationConstants.LogMessage.NewsCategoriesFetchedSuccessfully, LoggedInUserRole);
                 return Ok(categories);
