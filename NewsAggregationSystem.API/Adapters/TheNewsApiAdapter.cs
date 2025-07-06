@@ -52,13 +52,14 @@ namespace NewsAggregationSystem.API.Adapters
                 var url = BuildApiUrl(newsSource, country);
                 var response = await MakeApiRequest(client, url, newsSource);
                 var articles = await ProcessApiResponse(response, newsSource);
-                await SaveArticlesAndUpdateStatus(articles, newsSource, true);
-                
+                await SaveArticles(articles, newsSource);
+                await ChangeNewsSourceStatus(true, newsSource);
                 return articles;
             }
             catch (Exception ex)
             {
-                await SaveArticlesAndUpdateStatus(new List<Article>(), newsSource, false);
+                await SaveArticles(new List<Article>(), newsSource);
+                await ChangeNewsSourceStatus(false, newsSource);
                 logger.LogError(ex, ApplicationConstants.LogMessage.ExceptionWhileFetching, newsSourceId, ex.Message);
                 throw;
             }
@@ -84,7 +85,7 @@ namespace NewsAggregationSystem.API.Adapters
             logger.LogInformation(ApplicationConstants.LogMessage.SendingRequestToApi, url);
             var response = await client.GetAsync(url);
             logger.LogInformation(ApplicationConstants.LogMessage.ApiResponseStatus, response.StatusCode, newsSource.Id);
-            
+
             if (!response.IsSuccessStatusCode)
             {
                 throw new NewsSourceFetchFailedException(
@@ -92,7 +93,7 @@ namespace NewsAggregationSystem.API.Adapters
                     string.Format(ApplicationConstants.FailedToFetchNewsMessage, newsSource.Name, response.StatusCode)
                 );
             }
-            
+
             return response;
         }
 
@@ -112,14 +113,17 @@ namespace NewsAggregationSystem.API.Adapters
             return articles;
         }
 
-        private async Task SaveArticlesAndUpdateStatus(List<Article> articles, NewsSource newsSource, bool isActive)
+        private async Task SaveArticles(List<Article> articles, NewsSource newsSource)
         {
             if (articles.Any())
             {
                 logger.LogInformation(ApplicationConstants.LogMessage.SavingArticlesToDb, articles.Count, newsSource.Id);
                 await articleRepository.AddRangeAsync(articles);
             }
-            
+        }
+
+        private async Task ChangeNewsSourceStatus(bool isActive, NewsSource newsSource)
+        {
             await newsSourceRepository.ChangeNewsSourceStatus(isActive, newsSource);
             logger.LogInformation(ApplicationConstants.LogMessage.SourceStatusUpdated, isActive, newsSource.Id);
         }

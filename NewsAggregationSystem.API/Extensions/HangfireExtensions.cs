@@ -10,7 +10,7 @@ namespace NewsAggregationSystem.API.Extensions
             RecurringJob.AddOrUpdate<NewsFetchScheduler>(
                 "fetch-news-job",
                 scheduler => scheduler.ExecuteAsync(),
-                Cron.DayInterval(1) // every 3 hours
+                Cron.HourInterval(3) // every 3 hours
             );
         }
     }

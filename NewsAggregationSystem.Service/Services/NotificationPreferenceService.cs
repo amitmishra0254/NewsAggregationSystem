@@ -77,7 +77,7 @@ namespace NewsAggregationSystem.Service.Services
             if (!userIds.Any())
             {
                 userIds = await userRepository
-                    .GetWhere(user => user.IsActive)
+                    .GetWhere(user => user.IsActive && user.Id != ApplicationConstants.SystemUserId)
                     .Select(user => user.Id)
                     .ToListAsync();
             }
