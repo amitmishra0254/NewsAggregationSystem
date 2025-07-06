@@ -7,8 +7,8 @@ namespace NewsAggregationSystem.Service.Interfaces
         Task AddNotificationPreferencesPerCategory(int newsCategoryId);
         Task<List<NotificationPreferenceDTO>> GetUserNotificationPreferencesAsync(List<int> userIds);
         Task AddNotificationPreferencesPerUser(int userId);
-        Task<int> AddKeyword(string keyword, int categoryId, int userId);
-        Task<int> ChangeKeywordStatus(int keywordId, bool isEnable);
-        Task<int> ChangeCategoryStatus(int categoryId, bool isEnable, int userId);
+        Task<int> AddKeywordToCategoryAsync(string keyword, int categoryId, int userId);
+        Task<int> UpdateKeywordStatusAsync(int keywordId, bool isEnable);
+        Task<int> UpdateCategoryStatusAsync(int categoryId, bool isEnable, int userId);
     }
 }

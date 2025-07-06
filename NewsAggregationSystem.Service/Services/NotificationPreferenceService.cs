@@ -127,7 +127,7 @@ namespace NewsAggregationSystem.Service.Services
             return result;
         }
 
-        public async Task<int> AddKeyword(string keyword, int categoryId, int userId)
+        public async Task<int> AddKeywordToCategoryAsync(string keyword, int categoryId, int userId)
         {
             var isKeywordAlreadyExist = await userNewsKeywordRepository
                 .GetWhere(newsKeyword =>
@@ -151,7 +151,7 @@ namespace NewsAggregationSystem.Service.Services
             });
         }
 
-        public async Task<int> ChangeKeywordStatus(int keywordId, bool isEnable)
+        public async Task<int> UpdateKeywordStatusAsync(int keywordId, bool isEnable)
         {
             var existingKeyword = await userNewsKeywordRepository.GetWhere(newsKeyword => newsKeyword.Id == keywordId).FirstOrDefaultAsync();
             if (existingKeyword == null)
@@ -163,7 +163,7 @@ namespace NewsAggregationSystem.Service.Services
             return await userNewsKeywordRepository.UpdateAsync(existingKeyword);
         }
 
-        public async Task<int> ChangeCategoryStatus(int categoryId, bool isEnable, int userId)
+        public async Task<int> UpdateCategoryStatusAsync(int categoryId, bool isEnable, int userId)
         {
             var existingPreference = await notificationPreferenceRepository
                 .GetWhere(preference =>
