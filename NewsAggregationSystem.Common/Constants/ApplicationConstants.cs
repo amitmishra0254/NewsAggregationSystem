@@ -62,6 +62,17 @@
         public const string FailedToFetchNewsMessage = "Failed to fetch news from source: {0}, With Status Code: {1}, and Message: {3}";
         public const string TopicPredictionUrl = "http://127.0.0.1:5000/predict-topic"; //TODO
         public static int SystemUserId = -1;
+        
+        // API URL Parameters
+        public const string CountryParameter = "country";
+        public const string CategoryParameter = "category";
+        public const string ApiKeyParameter = "apiKey";
+        public const string LocaleParameter = "locale";
+        public const string LimitParameter = "limit";
+        public const string ApiTokenParameter = "api_token";
+        public const string DefaultCountry = "us";
+        public const string DefaultCategory = "";
+        public const string DefaultLimit = "3";
         public const string NewArticleNotificationTitle = "New Article Alert for You!";
         public const string UserAlreadyExistWithThisEmail = "User already exist with {0} Email Or {1} UserName.";
         public const string UserNotFoundWithThisEmail = "User not found with {0} Email.";
