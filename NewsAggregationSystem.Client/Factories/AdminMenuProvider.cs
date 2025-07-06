@@ -1,7 +1,5 @@
-﻿using NewsAggregationSystem.Client.Services.Admin;
-using NewsAggregationSystem.Client.Services.Articles;
-using NewsAggregationSystem.Client.Services.NewsCategory;
-using NewsAggregationSystem.Client.Services.NewsSources;
+﻿using NewsAggregationSystem.Client.Services;
+using NewsAggregationSystem.Client.Services.Interfaces;
 using NewsAggregationSystem.Common.Constants;
 using NewsAggregationSystem.Common.DTOs.NewsSources;
 using NewsAggregationSystem.Common.DTOs.Users;

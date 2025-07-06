@@ -1,4 +1,5 @@
-﻿using NewsAggregationSystem.Common.Constants;
+﻿using NewsAggregationSystem.Client.Services.Interfaces;
+using NewsAggregationSystem.Common.Constants;
 using NewsAggregationSystem.Common.DTOs.NewsArticles;
 using NewsAggregationSystem.Common.DTOs.Users;
 using NewsAggregationSystem.Common.Enums;
@@ -7,7 +8,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace NewsAggregationSystem.Client.Services.Articles
+namespace NewsAggregationSystem.Client.Services
 {
     public class ArticleService : IArticleService
     {

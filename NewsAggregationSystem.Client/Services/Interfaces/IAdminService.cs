@@ -1,4 +1,4 @@
-﻿namespace NewsAggregationSystem.Client.Services.Admin
+﻿namespace NewsAggregationSystem.Client.Services.Interfaces
 {
     public interface IAdminService
     {

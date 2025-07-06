@@ -1,6 +1,6 @@
 ﻿using NewsAggregationSystem.Common.DTOs.NewsCategories;
 
-namespace NewsAggregationSystem.Client.Services.NewsCategory
+namespace NewsAggregationSystem.Client.Services.Interfaces
 {
     public interface INewsCategoryService
     {

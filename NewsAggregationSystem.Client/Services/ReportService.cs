@@ -1,4 +1,5 @@
-﻿using NewsAggregationSystem.Common.DTOs;
+﻿using NewsAggregationSystem.Client.Services.Interfaces;
+using NewsAggregationSystem.Common.DTOs;
 using NewsAggregationSystem.Common.DTOs.Users;
 using NewsAggregationSystem.Common.Utilities;
 using Spectre.Console;
@@ -7,7 +8,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace NewsAggregationSystem.Client.Services.Reports
+namespace NewsAggregationSystem.Client.Services
 {
     public class ReportService : IReportService
     {

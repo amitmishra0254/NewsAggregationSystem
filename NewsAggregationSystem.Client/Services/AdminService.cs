@@ -1,10 +1,11 @@
-﻿using NewsAggregationSystem.Common.DTOs.Users;
+﻿using NewsAggregationSystem.Client.Services.Interfaces;
+using NewsAggregationSystem.Common.DTOs.Users;
 using Spectre.Console;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace NewsAggregationSystem.Client.Services.Admin
+namespace NewsAggregationSystem.Client.Services
 {
     public class AdminService : IAdminService
     {

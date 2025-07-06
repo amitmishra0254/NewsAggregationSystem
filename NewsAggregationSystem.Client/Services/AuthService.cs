@@ -1,4 +1,5 @@
-﻿using NewsAggregationSystem.Common.Constants;
+﻿using NewsAggregationSystem.Client.Services.Interfaces;
+using NewsAggregationSystem.Common.Constants;
 using NewsAggregationSystem.Common.DTOs.Authenticate;
 using NewsAggregationSystem.Common.DTOs.Users;
 using Spectre.Console;
@@ -6,7 +7,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 
-namespace NewsAggregationSystem.Client.Services.Authentication
+namespace NewsAggregationSystem.Client.Services
 {
     public class AuthService : IAuthService
     {

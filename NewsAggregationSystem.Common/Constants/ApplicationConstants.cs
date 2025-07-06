@@ -230,5 +230,6 @@ WelcomeMessageOnUserLogin +
         public static string Notification = "Notification";
         public static string NotificationPreferences = "NotificationPreferences";
         public static string NewsSourceNotFoundMessage = "News source not found";
+        public static string BaseUrl = "https://localhost:7122/api/";
     }
 }

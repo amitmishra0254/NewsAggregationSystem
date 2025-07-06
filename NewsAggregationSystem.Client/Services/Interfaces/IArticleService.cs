@@ -1,6 +1,6 @@
 ﻿using NewsAggregationSystem.Common.DTOs.NewsArticles;
 
-namespace NewsAggregationSystem.Client.Services.Articles
+namespace NewsAggregationSystem.Client.Services.Interfaces
 {
     public interface IArticleService
     {

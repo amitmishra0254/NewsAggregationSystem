@@ -1,4 +1,4 @@
-﻿namespace NewsAggregationSystem.Client.Services.Reports
+﻿namespace NewsAggregationSystem.Client.Services.Interfaces
 {
     public interface IReportService
     {

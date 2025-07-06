@@ -1,6 +1,6 @@
 ﻿using NewsAggregationSystem.Common.DTOs.NotificationPreferences;
 
-namespace NewsAggregationSystem.Client.Services.NotificationPreferences
+namespace NewsAggregationSystem.Client.Services.Interfaces
 {
     public interface INotificationPreferenceService
     {

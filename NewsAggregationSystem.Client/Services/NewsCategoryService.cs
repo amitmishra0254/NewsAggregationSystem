@@ -1,4 +1,5 @@
-﻿using NewsAggregationSystem.Common.Constants;
+﻿using NewsAggregationSystem.Client.Services.Interfaces;
+using NewsAggregationSystem.Common.Constants;
 using NewsAggregationSystem.Common.DTOs.NewsCategories;
 using NewsAggregationSystem.Common.DTOs.Users;
 using Spectre.Console;
@@ -6,7 +7,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace NewsAggregationSystem.Client.Services.NewsCategory
+namespace NewsAggregationSystem.Client.Services
 {
     public class NewsCategoryService : INewsCategoryService
     {
