@@ -36,7 +36,7 @@ namespace NewsAggregationSystem.Service.Services
             this.userRoleRepository = userRoleRepository;
             this.httpContextAccessor = httpContextAccessor;
         }
-        public async Task<AuthResponseDTO> Login(LoginRequestDTO loginRequest)
+        public async Task<AuthResponseDTO> AuthenticateUserAsync(LoginRequestDTO loginRequest)
         {
             var user = await userRepository.GetWhere(user => user.Email == loginRequest.Email).FirstOrDefaultAsync();
 
