@@ -226,5 +226,11 @@ namespace NewsAggregationSystem.Client.Tests
 
             Assert.That(result, Is.Null);
         }
+
+        [TearDown]
+        public void TearDown()
+        {
+            httpClient?.Dispose();
+        }
     }
 }

@@ -239,5 +239,11 @@ namespace NewsAggregationSystem.Client.Tests
                     req.RequestUri.ToString().EndsWith(ApplicationConstants.SignupPath)),
                 ItExpr.IsAny<CancellationToken>());
         }
+
+        [TearDown]
+        public void TearDown()
+        {
+            httpClient?.Dispose();
+        }
     }
 }

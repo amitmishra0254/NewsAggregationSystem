@@ -141,5 +141,11 @@ namespace NewsAggregationSystem.Client.Tests
 
             Assert.DoesNotThrowAsync(async () => await adminService.AddKeywordToHideArticlesAsync(keyword));
         }
+
+        [TearDown]
+        public void TearDown()
+        {
+            httpClient?.Dispose();
+        }
     }
 }

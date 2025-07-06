@@ -193,5 +193,11 @@ namespace NewsAggregationSystem.Client.Tests
 
             Assert.DoesNotThrowAsync(async () => await notificationPreferenceService.UpdateCategoryStatusAsync(categoryId, isEnabled));
         }
+
+        [TearDown]
+        public void TearDown()
+        {
+            httpClient?.Dispose();
+        }
     }
 }

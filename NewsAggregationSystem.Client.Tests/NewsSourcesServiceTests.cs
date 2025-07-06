@@ -205,5 +205,11 @@ namespace NewsAggregationSystem.Client.Tests
                     req.Content.Headers.ContentType.MediaType == ApplicationConstants.JsonContentType),
                 ItExpr.IsAny<CancellationToken>());
         }
+
+        [TearDown]
+        public void TearDown()
+        {
+            httpClient?.Dispose();
+        }
     }
 }

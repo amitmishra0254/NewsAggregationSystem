@@ -171,5 +171,11 @@ namespace NewsAggregationSystem.Client.Tests
 
             Assert.DoesNotThrowAsync(async () => await newsCategoryService.ToggleNewsCategoryVisibilityAsync(categoryId, isHidden));
         }
+
+        [TearDown]
+        public void TearDown()
+        {
+            httpClient?.Dispose();
+        }
     }
 }

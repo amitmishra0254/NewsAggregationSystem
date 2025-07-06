@@ -164,5 +164,11 @@ namespace NewsAggregationSystem.Client.Tests
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.Empty);
         }
+
+        [TearDown]
+        public void TearDown()
+        {
+            httpClient?.Dispose();
+        }
     }
 }

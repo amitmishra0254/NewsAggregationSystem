@@ -97,5 +97,12 @@ namespace NewsAggregationSystem.Client.Tests
 
             Assert.DoesNotThrowAsync(async () => await reportService.CreateArticleReportAsync(articleId, "Reason"));
         }
+
+        [TearDown]
+        public void TearDown()
+        {
+            httpClient?.Dispose();
+        }
+
     }
 }
