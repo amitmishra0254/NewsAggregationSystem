@@ -79,7 +79,7 @@
         public const string FailedToFetchNewsMessage = "Failed to fetch news from source: {0}, With Status Code: {1}, and Message: {3}";
         public const string TopicPredictionUrl = "http://127.0.0.1:5000/predict-topic"; //TODO
         public static int SystemUserId = -1;
-        
+
         // API URL Parameters
         public const string CountryParameter = "country";
         public const string CategoryParameter = "category";

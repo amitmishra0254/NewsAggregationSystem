@@ -23,7 +23,7 @@ namespace NewsAggregationSystem.API.Controllers
         public async Task<IActionResult> HideArticlesByKeyword([FromQuery] string keyword)
         {
             logger.LogInformation(ApplicationConstants.LogMessage.HidingArticlesByKeywordStarted, keyword, LoggedInUserId);
-            
+
             try
             {
                 var result = await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword, LoggedInUserId);

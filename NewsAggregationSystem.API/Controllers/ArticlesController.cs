@@ -176,12 +176,5 @@ namespace NewsAggregationSystem.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
             }
         }
-
-        [HttpGet("test")]
-        public async Task<IActionResult> Test()
-        {
-            await newsFetchScheduler.ExecuteAsync();
-            return Ok();
-        }
     }
 }

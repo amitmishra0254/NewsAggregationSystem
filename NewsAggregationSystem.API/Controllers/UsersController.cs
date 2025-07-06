@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NewsAggregationSystem.Common.Constants;
-using NewsAggregationSystem.Common.DTOs.Users;
 using NewsAggregationSystem.Service.Interfaces;
 
 namespace NewsAggregationSystem.API.Controllers
@@ -25,7 +24,7 @@ namespace NewsAggregationSystem.API.Controllers
 
             try
             {
-                var users = await RetrieveAllUsersAsync();
+                var users = await userService.GetAllUsers();
                 LogUsersRetrievedSuccessfully(users.Count);
                 return Ok(users);
             }
@@ -34,11 +33,6 @@ namespace NewsAggregationSystem.API.Controllers
                 LogUserRetrievalError(exception);
                 return CreateInternalServerErrorResponse(exception);
             }
-        }
-
-        private async Task<List<UserResponseDTO>> RetrieveAllUsersAsync()
-        {
-            return await userService.GetAllUsers();
         }
 
         private void LogUsersRetrievedSuccessfully(int userCount)

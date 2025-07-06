@@ -79,6 +79,7 @@ namespace NewsAggregationSystem.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
             }
         }
+
         [Authorize(Roles = ApplicationConstants.UserOnly)]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
