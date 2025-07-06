@@ -70,6 +70,14 @@
             public const string NewsSourceUpdatedSuccessfully = "News source ID: {NewsSourceId} updated successfully by user ID: {UserId}";
             public const string DeletingNewsSource = "Deleting news source with ID: {NewsSourceId}";
             public const string NewsSourceDeletedSuccessfully = "News source with ID: {NewsSourceId} deleted successfully.";
+
+            // Notification Preferences related messages
+            public const string AddingKeywordToCategory = "User {UserId} is attempting to add keyword '{Keyword}' to category ID {CategoryId}.";
+            public const string KeywordAddedToCategory = "Keyword '{Keyword}' added successfully for category ID {CategoryId} by user {UserId}.";
+            public const string ChangingKeywordStatus = "User {UserId} is attempting to change keyword status. Keyword ID: {KeywordId}, Enable: {IsEnable}.";
+            public const string KeywordStatusUpdated = "Keyword status updated successfully. Keyword ID: {KeywordId}, Enable: {IsEnable}.";
+            public const string ChangingCategoryStatus = "User {UserId} is attempting to change category status. Category ID: {CategoryId}, Enable: {IsEnable}.";
+            public const string CategoryStatusUpdated = "Category status updated successfully. Category ID: {CategoryId}, Enable: {IsEnable}, User ID: {UserId}.";
         }
 
 
@@ -137,8 +145,8 @@
 
         public const string CreateExternalServer = "Create External Server";
         public const string ViewExternalServers = "View the list of external servers and status";
-        public const string ViewExternalServerDetails = "View the external server’s details";
-        public const string EditExternalServer = "Update/Edit the external server’s details";
+        public const string ViewExternalServerDetails = "View the external server's details";
+        public const string EditExternalServer = "Update/Edit the external server's details";
         public const string AddNewsCategory = "Add new News Category";
         public const string HideArticlesByCategory = "Hide the Articles by News Category";
         public const string UnhideArticlesByCategory = "UnHide the Articles by News Category";

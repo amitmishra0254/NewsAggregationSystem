@@ -22,11 +22,11 @@ namespace NewsAggregationSystem.API.Controllers
         [HttpPost("add-keyword"), Authorize(Roles = ApplicationConstants.UserOnly)]
         public async Task<IActionResult> AddKeywordToCategory([FromQuery] string keyword, [FromQuery] int categoryId)
         {
-            logger.LogInformation("User {UserId} is attempting to add keyword '{Keyword}' to category ID {CategoryId}.", LoggedInUserId, keyword, categoryId);
+            logger.LogInformation(ApplicationConstants.LogMessage.AddingKeywordToCategory, LoggedInUserId, keyword, categoryId);
             try
             {
                 var result = await notificationPreferenceService.AddKeywordToCategoryAsync(keyword, categoryId, LoggedInUserId);
-                logger.LogInformation("Keyword '{Keyword}' added successfully for category ID {CategoryId} by user {UserId}.", keyword, categoryId, LoggedInUserId);
+                logger.LogInformation(ApplicationConstants.LogMessage.KeywordAddedToCategory, keyword, categoryId, LoggedInUserId);
                 return Ok(result);
             }
             catch (AlreadyExistException exception)
@@ -44,11 +44,11 @@ namespace NewsAggregationSystem.API.Controllers
         [HttpPost("change-keyword-status"), Authorize(Roles = ApplicationConstants.UserOnly)]
         public async Task<IActionResult> UpdateKeywordStatus([FromQuery] int keywordId, [FromQuery] bool isEnable)
         {
-            logger.LogInformation("User {UserId} is attempting to change keyword status. Keyword ID: {KeywordId}, Enable: {IsEnable}.", LoggedInUserId, keywordId, isEnable);
+            logger.LogInformation(ApplicationConstants.LogMessage.ChangingKeywordStatus, LoggedInUserId, keywordId, isEnable);
             try
             {
                 var result = await notificationPreferenceService.UpdateKeywordStatusAsync(keywordId, isEnable);
-                logger.LogInformation("Keyword status updated successfully. Keyword ID: {KeywordId}, Enable: {IsEnable}.", keywordId, isEnable);
+                logger.LogInformation(ApplicationConstants.LogMessage.KeywordStatusUpdated, keywordId, isEnable);
                 return Ok(result);
             }
             catch (NotFoundException exception)
@@ -66,11 +66,11 @@ namespace NewsAggregationSystem.API.Controllers
         [HttpPost("change-category-status"), Authorize(Roles = ApplicationConstants.UserOnly)]
         public async Task<IActionResult> UpdateCategoryStatus([FromQuery] int categoryId, [FromQuery] bool isEnable)
         {
-            logger.LogInformation("User {UserId} is attempting to change category status. Category ID: {CategoryId}, Enable: {IsEnable}.", LoggedInUserId, categoryId, isEnable);
+            logger.LogInformation(ApplicationConstants.LogMessage.ChangingCategoryStatus, LoggedInUserId, categoryId, isEnable);
             try
             {
                 var result = await notificationPreferenceService.UpdateCategoryStatusAsync(categoryId, isEnable, LoggedInUserId);
-                logger.LogInformation("Category status updated successfully. Category ID: {CategoryId}, Enable: {IsEnable}, User ID: {UserId}.", categoryId, isEnable, LoggedInUserId);
+                logger.LogInformation(ApplicationConstants.LogMessage.CategoryStatusUpdated, categoryId, isEnable, LoggedInUserId);
                 return Ok(result);
             }
             catch (NotFoundException exception)
