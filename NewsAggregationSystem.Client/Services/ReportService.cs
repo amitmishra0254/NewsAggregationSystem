@@ -1,7 +1,6 @@
 ﻿using NewsAggregationSystem.Client.Services.Interfaces;
 using NewsAggregationSystem.Common.DTOs;
 using NewsAggregationSystem.Common.DTOs.Users;
-using NewsAggregationSystem.Common.Utilities;
 using Spectre.Console;
 using System.Net;
 using System.Net.Http.Headers;
@@ -21,12 +20,12 @@ namespace NewsAggregationSystem.Client.Services
             this.jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         }
 
-        public async Task CreateArticleReportAsync(int articleId)
+        public async Task CreateArticleReportAsync(int articleId, string reason)
         {
             try
             {
                 SetAuthorizationHeader();
-                var reportDto = CreateReportRequestAsync(articleId);
+                var reportDto = CreateReportRequestAsync(articleId, reason);
                 var response = await SendReportRequestAsync(reportDto);
                 await HandleReportResponseAsync(response, articleId);
             }
@@ -41,9 +40,8 @@ namespace NewsAggregationSystem.Client.Services
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", UserState.AccessToken);
         }
 
-        private ReportRequestDTO CreateReportRequestAsync(int articleId)
+        private ReportRequestDTO CreateReportRequestAsync(int articleId, string reason)
         {
-            var reason = InputHelper.ReadString("Enter the reason for reporting this article: ");
             return new ReportRequestDTO
             {
                 ArticleId = articleId,

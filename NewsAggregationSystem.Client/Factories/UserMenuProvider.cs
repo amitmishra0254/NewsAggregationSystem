@@ -470,7 +470,8 @@ namespace NewsAggregationSystem.Client.Factories
                     await articleService.ReactToArticleAsync(articleId, (int)ReactionType.Dislike);
                     break;
                 case ApplicationConstants.HeadlineReportArticle:
-                    await reportService.CreateArticleReportAsync(articleId);
+                    var reason = InputHelper.ReadString("Enter the reason for reporting this article: ");
+                    await reportService.CreateArticleReportAsync(articleId, reason);
                     break;
                 case ApplicationConstants.HeadlineReadArticle:
                     await ReadArticleHandler(articleId);

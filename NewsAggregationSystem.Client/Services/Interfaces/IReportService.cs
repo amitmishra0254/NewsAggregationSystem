@@ -2,6 +2,6 @@
 {
     public interface IReportService
     {
-        Task CreateArticleReportAsync(int articleId);
+        Task CreateArticleReportAsync(int articleId, string reason);
     }
 }
