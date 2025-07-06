@@ -50,18 +50,18 @@ namespace NewsAggregationSystem.Service.Services
                 var admin = await userRoleRepository.GetWhere(userRole => userRole.RoleId == (int)UserRoles.Admin)
                     .Include(userRole => userRole.User)
                     .Select(userRole => userRole.User)
-                    .FirstOrDefaultAsync();
+                    .FirstAsync();
 
                 await reportRepository.AddAsync(new ReportedArticle
                 {
                     ArticleId = reportRequest.ArticleId,
-                    UserId = admin?.Id ?? userId,
+                    UserId = userId,
                     Reason = reportRequest.Reason,
                     CreatedById = userId,
                     CreatedDate = dateTimeHelper.CurrentUtcDateTime
                 });
 
-                return await notificationService.NotifyAdminAboutReportedArticleAsync(reportRequest, userId);
+                return await notificationService.NotifyAdminAboutReportedArticleAsync(reportRequest, admin.Id);
             }
             return 0;
         }
