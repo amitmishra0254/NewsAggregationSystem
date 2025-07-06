@@ -72,7 +72,7 @@ namespace NewsAggregationSystem.Service.Services
             }
         }
 
-        public async Task<List<NotificationPreferenceDTO>> GetNotificationPreferences(List<int> userIds)
+        public async Task<List<NotificationPreferenceDTO>> GetUserNotificationPreferencesAsync(List<int> userIds)
         {
             if (!userIds.Any())
             {

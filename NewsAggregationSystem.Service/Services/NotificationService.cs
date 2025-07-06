@@ -27,12 +27,12 @@ namespace NewsAggregationSystem.Service.Services
             this.mapper = mapper;
         }
 
-        public async Task<int> AddNotifications(List<Notification> notifications)
+        public async Task<int> CreateNotificationsAsync(List<Notification> notifications)
         {
             return await notificationRepository.AddRangeAsync(notifications);
         }
 
-        public async Task<List<NotificationDTO>> GetAllNotifications(int userId)
+        public async Task<List<NotificationDTO>> GetUserNotificationsAsync(int userId)
         {
             var notifications = await notificationRepository.GetWhere(notification => notification.IsRead == false && notification.UserId == userId).ToListAsync();
             notifications.ForEach(notification => notification.IsRead = true);
@@ -58,7 +58,7 @@ namespace NewsAggregationSystem.Service.Services
             return notifications;
         }
 
-        public async Task<int> NotifyAdminAboutReportedArticle(ReportRequestDTO report, int userId)
+        public async Task<int> NotifyAdminAboutReportedArticleAsync(ReportRequestDTO report, int userId)
         {
             var notification = new Notification
             {

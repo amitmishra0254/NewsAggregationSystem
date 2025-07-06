@@ -21,12 +21,12 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpGet, Authorize(Roles = ApplicationConstants.UserOnly)]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetUserNotifications()
         {
             logger.LogInformation("Fetching notifications for user ID: {UserId}", LoggedInUserId);
             try
             {
-                var notifications = await notificationService.GetAllNotifications(LoggedInUserId);
+                var notifications = await notificationService.GetUserNotificationsAsync(LoggedInUserId);
                 logger.LogInformation("Fetched {Count} notifications for user ID: {UserId}", notifications.Count, LoggedInUserId);
                 return Ok(notifications);
             }
@@ -38,12 +38,12 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpGet("configurations"), Authorize(Roles = ApplicationConstants.UserOnly)]
-        public async Task<IActionResult> GetNotificationConfigurations()
+        public async Task<IActionResult> GetUserNotificationPreferences()
         {
             logger.LogInformation("Fetching notification preferences for user ID: {UserId}", LoggedInUserId);
             try
             {
-                var preferences = await notificationPreferenceService.GetNotificationPreferences(new List<int> { LoggedInUserId });
+                var preferences = await notificationPreferenceService.GetUserNotificationPreferencesAsync(new List<int> { LoggedInUserId });
                 logger.LogInformation("Fetched notification preferences for user ID: {UserId}", LoggedInUserId);
                 return Ok(preferences);
             }
