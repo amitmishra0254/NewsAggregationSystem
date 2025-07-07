@@ -43,17 +43,9 @@ namespace NewsAggregationSystem.Service.Services
 
             if (existingReport == null)
             {
-                var thresholdValue = Convert.ToInt32(configuration["ArticlesThresholdValue"]);
-                var countOfReports = await reportRepository.GetWhere(report => report.ArticleId == report.ArticleId).CountAsync();
-                if (countOfReports + 1 > thresholdValue)
-                {
-                    await articleService.HideArticle(reportRequest.ArticleId);
-                }
+                await HideReportIfReachedThreshold(reportRequest);
 
-                var admin = await userRoleRepository.GetWhere(userRole => userRole.RoleId == (int)UserRoles.Admin)
-                    .Include(userRole => userRole.User)
-                    .Select(userRole => userRole.User)
-                    .FirstAsync();
+                var admin = await GetAdminByRole();
 
                 await reportRepository.AddAsync(new ReportedArticle
                 {
@@ -68,6 +60,25 @@ namespace NewsAggregationSystem.Service.Services
                 return await notificationService.NotifyAdminAboutReportedArticleAsync(reportRequest, admin.Id);
             }
             return 0;
+        }
+
+        private async Task<User> GetAdminByRole()
+        {
+            var admin = await userRoleRepository.GetWhere(userRole => userRole.RoleId == (int)UserRoles.Admin)
+                    .Include(userRole => userRole.User)
+                    .Select(userRole => userRole.User)
+                    .FirstAsync();
+            return admin;
+        }
+
+        private async Task HideReportIfReachedThreshold(ReportRequestDTO reportRequest)
+        {
+            var thresholdValue = Convert.ToInt32(configuration["ArticlesThresholdValue"]);
+            var countOfReports = await reportRepository.GetWhere(report => report.ArticleId == report.ArticleId).CountAsync();
+            if (countOfReports + 1 > thresholdValue)
+            {
+                await articleService.HideArticle(reportRequest.ArticleId);
+            }
         }
 
         private async Task NotifyAdminAboutReportedArticleAsync(User admin, ReportRequestDTO reportRequest)
