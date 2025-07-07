@@ -151,7 +151,7 @@
         public const string DateTime2With2Precision = "datetime2(2)";
         public const string NewsAggregationSystemDbConnection = "NewsAggregationSystemDbConnection";
         public const string FailedToFetchNewsMessage = "Failed to fetch news from source: {0}, With Status Code: {1}, and Message: {2}";
-        public const string TopicPredictionUrl = "http://127.0.0.1:5000/predict-topic"; //TODO
+        public const string TopicPredictionUrl = "http://127.0.0.1:5000/predict-topic";
         public static int SystemUserId = -1;
 
         // API URL Parameters
