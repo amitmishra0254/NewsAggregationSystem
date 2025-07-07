@@ -11,16 +11,18 @@ namespace NewsAggregationSystem.Common.Providers.SmtpProvider
     {
         private readonly EmailSettings _settings;
         private readonly ILogger<EmailProvider> logger;
-        public EmailProvider(IOptions<EmailSettings> settings)
+
+        public EmailProvider(IOptions<EmailSettings> settings, ILogger<EmailProvider> logger)
         {
             _settings = settings.Value;
+            this.logger = logger;
         }
 
         public async Task SendEmailAsync(string to, string subject, string body)
         {
             try
             {
-                logger.LogInformation("Sending email to: {To}, Subject: {Subject}", to, subject);
+                logger.LogInformation($"Sending email to: {to}, Subject: {subject}");
                 using var client = new SmtpClient(_settings.SmtpServer, _settings.Port)
                 {
                     Credentials = new NetworkCredential(_settings.Username, _settings.Password),
@@ -37,18 +39,18 @@ namespace NewsAggregationSystem.Common.Providers.SmtpProvider
 
                 mail.To.Add(to);
                 await client.SendMailAsync(mail);
-                logger.LogInformation("Email sent successfully to: {To}", to);
+                logger.LogInformation($"Email sent successfully to: {to}");
             }
             catch (Exception exception)
             {
-                logger.LogError(exception, "Error occurred while sending email to: {To}", to);
+                logger.LogError(exception, $"Error occurred while sending email to: {to}");
                 throw;
             }
         }
 
         public async Task<int> SendBulkEmail(List<NotificationEmailDTO> emails)
         {
-            logger.LogInformation("Sending bulk emails. Count: {Count}", emails.Count);
+            logger.LogInformation($"Sending bulk emails. Count: {emails.Count}");
 
             try
             {
@@ -70,11 +72,11 @@ namespace NewsAggregationSystem.Common.Providers.SmtpProvider
                         mail.To.Add(email.Email);
 
                         await client.SendMailAsync(mail);
-                        logger.LogInformation("Email sent to: {Email}", email.Email);
+                        logger.LogInformation($"Email sent to: {email.Email}");
                     }));
 
                 await Task.WhenAll(sendTasks);
-                logger.LogInformation("Bulk email sending process completed. Attempted: {Count}", emails.Count);
+                logger.LogInformation($"Bulk email sending process completed. Attempted: {emails.Count}");
                 return emails.Count;
             }
             catch (Exception ex)

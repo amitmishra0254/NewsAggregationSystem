@@ -4,6 +4,7 @@ using NewsAggregationSystem.Common.Constants;
 using NewsAggregationSystem.Common.DTOs;
 using NewsAggregationSystem.Common.Enums;
 using NewsAggregationSystem.Common.Exceptions;
+using NewsAggregationSystem.Common.Providers.SmtpProvider;
 using NewsAggregationSystem.Common.Utilities;
 using NewsAggregationSystem.DAL.Entities;
 using NewsAggregationSystem.DAL.Repositories.Generic;
@@ -19,15 +20,17 @@ namespace NewsAggregationSystem.Service.Services
         private readonly IConfiguration configuration;
         private readonly INotificationService notificationService;
         private readonly IRepositoryBase<UserRole> userRoleRepository;
+        private readonly IEmailProvider emailProvider;
         private readonly DateTimeHelper dateTimeHelper = DateTimeHelper.GetInstance();
 
-        public ReportService(IReportRepository reportRepository, IArticleService articleService, IConfiguration configuration, INotificationService notificationService, IRepositoryBase<UserRole> userRoleRepository)
+        public ReportService(IReportRepository reportRepository, IArticleService articleService, IConfiguration configuration, INotificationService notificationService, IRepositoryBase<UserRole> userRoleRepository, IEmailProvider emailProvider)
         {
             this.reportRepository = reportRepository;
             this.articleService = articleService;
             this.configuration = configuration;
             this.notificationService = notificationService;
             this.userRoleRepository = userRoleRepository;
+            this.emailProvider = emailProvider;
         }
 
         public async Task<int> CreateArticleReportAsync(ReportRequestDTO reportRequest, int userId)
@@ -61,9 +64,16 @@ namespace NewsAggregationSystem.Service.Services
                     CreatedDate = dateTimeHelper.CurrentUtcDateTime
                 });
 
+                await NotifyAdminAboutReportedArticleAsync(admin, reportRequest);
                 return await notificationService.NotifyAdminAboutReportedArticleAsync(reportRequest, admin.Id);
             }
             return 0;
+        }
+
+        private async Task NotifyAdminAboutReportedArticleAsync(User admin, ReportRequestDTO reportRequest)
+        {
+            var emailBody = $"Article Id : {reportRequest.ArticleId} has been reported with the reason : " + reportRequest.Reason;
+            await emailProvider.SendEmailAsync(admin.Email, ApplicationConstants.ReportTitle, emailBody);
         }
     }
 }
