@@ -4,6 +4,6 @@ namespace NewsAggregationSystem.Service.Interfaces
 {
     public interface IAuthService
     {
-        Task<AuthResponseDTO> Login(LoginRequestDTO loginRequest);
+        Task<AuthResponseDTO> AuthenticateUserAsync(LoginRequestDTO loginRequest);
     }
 }

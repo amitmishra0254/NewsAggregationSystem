@@ -9,5 +9,6 @@ namespace NewsAggregationSystem.DAL.Repositories.Articles
         Task<CategoryRecommendationDTO?> GetMostLikedCategory(int userId);
         Task<CategoryRecommendationDTO?> GetMostSavedCategory(int userId);
         Task<CategoryRecommendationDTO?> GetMostReadCategory(int userId);
+        Task<Article> GetArticleById(int Id, int userId);
     }
 }

@@ -72,12 +72,12 @@ namespace NewsAggregationSystem.Service.Services
             }
         }
 
-        public async Task<List<NotificationPreferenceDTO>> GetNotificationPreferences(List<int> userIds)
+        public async Task<List<NotificationPreferenceDTO>> GetUserNotificationPreferencesAsync(List<int> userIds)
         {
             if (!userIds.Any())
             {
                 userIds = await userRepository
-                    .GetWhere(user => user.IsActive)
+                    .GetWhere(user => user.IsActive && user.Id != ApplicationConstants.SystemUserId)
                     .Select(user => user.Id)
                     .ToListAsync();
             }
@@ -127,7 +127,7 @@ namespace NewsAggregationSystem.Service.Services
             return result;
         }
 
-        public async Task<int> AddKeyword(string keyword, int categoryId, int userId)
+        public async Task<int> AddKeywordToCategoryAsync(string keyword, int categoryId, int userId)
         {
             var isKeywordAlreadyExist = await userNewsKeywordRepository
                 .GetWhere(newsKeyword =>
@@ -151,7 +151,7 @@ namespace NewsAggregationSystem.Service.Services
             });
         }
 
-        public async Task<int> ChangeKeywordStatus(int keywordId, bool isEnable)
+        public async Task<int> UpdateKeywordStatusAsync(int keywordId, bool isEnable)
         {
             var existingKeyword = await userNewsKeywordRepository.GetWhere(newsKeyword => newsKeyword.Id == keywordId).FirstOrDefaultAsync();
             if (existingKeyword == null)
@@ -163,7 +163,7 @@ namespace NewsAggregationSystem.Service.Services
             return await userNewsKeywordRepository.UpdateAsync(existingKeyword);
         }
 
-        public async Task<int> ChangeCategoryStatus(int categoryId, bool isEnable, int userId)
+        public async Task<int> UpdateCategoryStatusAsync(int categoryId, bool isEnable, int userId)
         {
             var existingPreference = await notificationPreferenceRepository
                 .GetWhere(preference =>
@@ -179,22 +179,5 @@ namespace NewsAggregationSystem.Service.Services
             existingPreference.IsEnabled = isEnable;
             return await notificationPreferenceRepository.UpdateAsync(existingPreference);
         }
-
-
-        /*public async Task<int> UpdateNotificationConfigurations(List<NotificationConfigurationResponseDTO> notificationConfigurations)
-        {
-            var notificationConfigurations = await notificationPreferenceRepository.GetWhere(notificationConfiguration => notificationConfiguration.UserId == userId)
-                .Include(notificationConfiguration => notificationConfiguration.NewsCategory)
-                .Include(notificationConfiguration => notificationConfiguration.UserNewsKeyword)
-                .GroupBy(notificationConfiguration => notificationConfiguration.NewsCategory.Name)
-                .Select(group => new NotificationConfigurationResponseDTO
-                {
-                    Category = group.Key,
-                    Keywords = string.Join("|", group.Select(p => p.UserNewsKeyword.Name)),
-                    IsEnabled = group.First().IsEnabled
-                }).ToListAsync();
-
-            return notificationConfigurations;
-        }*/
     }
 }

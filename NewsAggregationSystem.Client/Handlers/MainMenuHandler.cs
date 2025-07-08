@@ -1,5 +1,6 @@
 ﻿using NewsAggregationSystem.Client.Factories;
-using NewsAggregationSystem.Client.Services.Authentication;
+using NewsAggregationSystem.Client.Services;
+using NewsAggregationSystem.Client.Services.Interfaces;
 using NewsAggregationSystem.Common.Constants;
 using NewsAggregationSystem.Common.DTOs.Users;
 using NewsAggregationSystem.Common.Utilities;
@@ -15,7 +16,7 @@ namespace NewsAggregationSystem.Client.Handlers
         public MainMenuHandler()
         {
             httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri("https://localhost:7122/api/");
+            httpClient.BaseAddress = new Uri(ApplicationConstants.BaseUrl);
             authService = new AuthService(httpClient);
         }
 
@@ -65,7 +66,7 @@ namespace NewsAggregationSystem.Client.Handlers
                     Password = password
                 };
 
-                var response = await authService.Login(loginRequest);
+                var response = await authService.AuthenticateUserAsync(loginRequest);
 
                 if (response != null)
                 {
@@ -100,7 +101,7 @@ namespace NewsAggregationSystem.Client.Handlers
                 Email = email,
                 Password = password
             };
-            await authService.Signup(signupRequest);
+            await authService.RegisterUserAsync(signupRequest);
         }
     }
 }

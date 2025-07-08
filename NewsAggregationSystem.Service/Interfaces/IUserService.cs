@@ -7,7 +7,7 @@ namespace NewsAggregationSystem.Service.Interfaces
     public interface IUserService
     {
         Task<List<NotificationEmailDTO>> GenerateNotificationEmails(List<Notification> notifications);
-        Task<int> AddUser(UserRequestDTO user);
+        Task<int> CreateUserAsync(UserRequestDTO user);
         Task<List<UserResponseDTO>> GetAllUsers();
     }
 }

@@ -22,43 +22,43 @@ namespace NewsAggregationSystem.Service.Services
             this.mapper = mapper;
         }
 
-        public async Task<List<NewsSourceDTO>> GetAll()
+        public async Task<List<NewsSourceDTO>> GetAllNewsSourcesAsync()
         {
             var entities = await repository.GetAll().ToListAsync();
             return mapper.Map<List<NewsSourceDTO>>(entities);
         }
 
-        public async Task<NewsSourceDTO> GetById(int Id)
+        public async Task<NewsSourceDTO> GetNewsSourceByIdAsync(int newsSourceId)
         {
-            var entity = await repository.GetWhere(newsSource => newsSource.Id == Id).FirstOrDefaultAsync();
+            var entity = await repository.GetWhere(newsSource => newsSource.Id == newsSourceId).FirstOrDefaultAsync();
             return entity == null ? null : mapper.Map<NewsSourceDTO>(entity);
         }
 
-        public async Task Add(CreateNewsSourceDTO newsSourceRequest, int UserId)
+        public async Task CreateNewsSourceAsync(CreateNewsSourceDTO newsSourceRequest, int userId)
         {
             var newsSource = mapper.Map<NewsSource>(newsSourceRequest);
             newsSource.IsActive = false;
             newsSource.CreatedDate = dateTimeHelper.CurrentUtcDateTime;
-            newsSource.CreatedById = UserId;
+            newsSource.CreatedById = userId;
             newsSource.LastAccess = dateTimeHelper.GetMinUtcDate;
             await repository.AddAsync(newsSource);
         }
 
-        public async Task Update(int Id, UpdateNewsSourceDTO newsSource, int UserId)
+        public async Task UpdateNewsSourceAsync(int newsSourceId, UpdateNewsSourceDTO newsSource, int userId)
         {
-            var entity = await repository.GetWhere(newsSource => newsSource.Id == Id).FirstOrDefaultAsync();
+            var entity = await repository.GetWhere(newsSource => newsSource.Id == newsSourceId).FirstOrDefaultAsync();
             if (entity == null) throw new NotFoundException(ApplicationConstants.NewsSourceNotFoundMessage);
 
             entity.ApiKey = newsSource.ApiKey;
             entity.IsActive = newsSource.IsActive;
-            entity.ModifiedById = UserId;
+            entity.ModifiedById = userId;
             entity.ModifiedDate = dateTimeHelper.CurrentUtcDateTime;
             await repository.UpdateAsync(entity);
         }
 
-        public async Task Delete(int Id)
+        public async Task DeleteNewsSourceAsync(int newsSourceId)
         {
-            var entity = await repository.GetWhere(newsSource => newsSource.Id == Id).FirstOrDefaultAsync();
+            var entity = await repository.GetWhere(newsSource => newsSource.Id == newsSourceId).FirstOrDefaultAsync();
             if (entity == null) throw new NotFoundException(ApplicationConstants.NewsSourceNotFoundMessage);
 
             await repository.DeleteAsync(entity);

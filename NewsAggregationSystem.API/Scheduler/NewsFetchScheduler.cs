@@ -38,10 +38,10 @@ namespace NewsAggregationSystem.API.Scheduler
 
                     if (articles.Any())
                     {
-                        var userPreferences = await notificationPreferenceService.GetNotificationPreferences(new List<int>());
+                        var userPreferences = await notificationPreferenceService.GetUserNotificationPreferencesAsync(new List<int>());
                         var notifications = notificationService.GenerateNotificationsFromUserPreferences(articles, userPreferences);
                         var emails = await userService.GenerateNotificationEmails(notifications);
-                        await notificationService.AddNotifications(notifications);
+                        await notificationService.CreateNotificationsAsync(notifications);
                         await emailProvider.SendBulkEmail(emails);
                         logger.LogInformation($"Fetched {articles.Count} articles using {adapter.GetType().Name}");
                         logger.LogInformation($"Successfully sent {notifications.Count} in app notifications and Emails using with {articles.Count} articles.");

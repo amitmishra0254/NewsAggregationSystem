@@ -20,20 +20,20 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ReportNewsArticle(ReportRequestDTO report)
+        public async Task<IActionResult> CreateArticleReport(ReportRequestDTO report)
         {
-            logger.LogInformation("User {UserId} is attempting to report article ID: {ArticleId} with reason: {Reason}", LoggedInUserId, report.ArticleId, report.Reason);
+            logger.LogInformation(ApplicationConstants.LogMessage.CreatingArticleReport, LoggedInUserId, report.ArticleId, report.Reason);
             try
             {
-                var response = await reportService.ReportNewsArticle(report, LoggedInUserId);
+                var response = await reportService.CreateArticleReportAsync(report, LoggedInUserId);
 
                 if (response == 0)
                 {
-                    logger.LogWarning("Article ID: {ArticleId} has already been reported by user ID: {UserId}", report.ArticleId, LoggedInUserId);
+                    logger.LogWarning(ApplicationConstants.LogMessage.ArticleAlreadyReported, report.ArticleId, LoggedInUserId);
                     return BadRequest(string.Format(ApplicationConstants.ArticleIsAlreadyReported, report.ArticleId));
                 }
 
-                logger.LogInformation("Article ID: {ArticleId} reported successfully by user ID: {UserId}", report.ArticleId, LoggedInUserId);
+                logger.LogInformation(ApplicationConstants.LogMessage.ArticleReportCreated, report.ArticleId, LoggedInUserId);
                 return Ok();
 
             }

@@ -36,7 +36,7 @@ namespace NewsAggregationSystem.Service.Services
             this.userRoleRepository = userRoleRepository;
             this.httpContextAccessor = httpContextAccessor;
         }
-        public async Task<AuthResponseDTO> Login(LoginRequestDTO loginRequest)
+        public async Task<AuthResponseDTO> AuthenticateUserAsync(LoginRequestDTO loginRequest)
         {
             var user = await userRepository.GetWhere(user => user.Email == loginRequest.Email).FirstOrDefaultAsync();
 
@@ -87,7 +87,7 @@ namespace NewsAggregationSystem.Service.Services
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("Jwt:key").Value));
 
-            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
                 claims: claims,

@@ -26,14 +26,14 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpPost("sign-up"), AllowAnonymous]
-        public async Task<IActionResult> Add([FromBody] UserRequestDTO userRequest)
+        public async Task<IActionResult> RegisterUser([FromBody] UserRequestDTO userRequest)
         {
             logger.LogInformation(ApplicationConstants.LogMessage.SigningUpUser, userRequest.Email);
             try
             {
-                var createdUser = await userService.AddUser(userRequest);
+                var createdUser = await userService.CreateUserAsync(userRequest);
                 logger.LogInformation(ApplicationConstants.LogMessage.UserSignedUpSuccessfully, userRequest.Email);
-                return CreatedAtAction(nameof(Add), createdUser);
+                return CreatedAtAction(nameof(RegisterUser), createdUser);
             }
             catch (AlreadyExistException exception)
             {
@@ -53,12 +53,12 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpPost("login"), AllowAnonymous]
-        public async Task<IActionResult> Login(LoginRequestDTO loginRequest)
+        public async Task<IActionResult> AuthenticateUser(LoginRequestDTO loginRequest)
         {
             logger.LogInformation(ApplicationConstants.LogMessage.UserLoginAttempt, loginRequest.Email);
             try
             {
-                var result = await authService.Login(loginRequest);
+                var result = await authService.AuthenticateUserAsync(loginRequest);
                 logger.LogInformation(ApplicationConstants.LogMessage.UserLoggedInSuccessfully, loginRequest.Email);
 
                 return Ok(result);
@@ -79,9 +79,10 @@ namespace NewsAggregationSystem.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
             }
         }
+
         [Authorize(Roles = ApplicationConstants.UserOnly)]
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> SignOutUser()
         {
             logger.LogInformation(ApplicationConstants.LogMessage.UserLogoutAttempt);
             try

@@ -52,7 +52,7 @@ namespace NewsAggregationSystem.Service.Services
             return emailList;
         }
 
-        public async Task<int> AddUser(UserRequestDTO userRequestData)
+        public async Task<int> CreateUserAsync(UserRequestDTO userRequestData)
         {
             var existingUserWithEmail = await userRepository.GetWhere(user => user.Email.ToLower() == userRequestData.Email.ToLower()).FirstOrDefaultAsync();
             var existingUserWithUserName = await userRepository.GetWhere(user => user.UserName.ToLower() == userRequestData.UserName.ToLower()).FirstOrDefaultAsync();

@@ -4,6 +4,6 @@ namespace NewsAggregationSystem.Service.Interfaces
 {
     public interface IReportService
     {
-        Task<int> ReportNewsArticle(ReportRequestDTO report, int userId);
+        Task<int> CreateArticleReportAsync(ReportRequestDTO report, int userId);
     }
 }

@@ -20,15 +20,14 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpPost("hide-article-by-keyword")]
-        public async Task<IActionResult> AddKeywordToHideArticles([FromQuery] string keyword)
+        public async Task<IActionResult> HideArticlesByKeyword([FromQuery] string keyword)
         {
             logger.LogInformation(ApplicationConstants.LogMessage.HidingArticlesByKeywordStarted, keyword, LoggedInUserId);
+
             try
             {
-                var result = await hiddenArticleKeywordService.Add(keyword, LoggedInUserId);
-
+                var result = await hiddenArticleKeywordService.AddHiddenKeywordAsync(keyword, LoggedInUserId);
                 logger.LogInformation(ApplicationConstants.LogMessage.HidingArticlesByKeywordSucceeded, keyword, LoggedInUserId);
-
                 return Ok(result);
             }
             catch (Exception exception)

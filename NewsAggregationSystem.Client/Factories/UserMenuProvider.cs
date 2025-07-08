@@ -1,7 +1,5 @@
-﻿using NewsAggregationSystem.Client.Services.Articles;
-using NewsAggregationSystem.Client.Services.NotificationPreferences;
-using NewsAggregationSystem.Client.Services.Notifications;
-using NewsAggregationSystem.Client.Services.Reports;
+﻿using NewsAggregationSystem.Client.Services;
+using NewsAggregationSystem.Client.Services.Interfaces;
 using NewsAggregationSystem.Common.Constants;
 using NewsAggregationSystem.Common.DTOs.NewsArticles;
 using NewsAggregationSystem.Common.DTOs.NewsCategories;
@@ -129,7 +127,7 @@ namespace NewsAggregationSystem.Client.Factories
             Console.Clear();
             AnsiConsole.MarkupLine($"[bold blue]{ApplicationConstants.Notification}[/]");
 
-            var notifications = await notificationServices.GetAllNotifications();
+            var notifications = await notificationServices.GetUserNotificationsAsync();
 
             if (notifications == null || !notifications.Any())
             {
@@ -182,7 +180,7 @@ namespace NewsAggregationSystem.Client.Factories
         {
             Console.Clear();
             AnsiConsole.MarkupLine("[bold underline green]Notification Configuration[/]");
-            var configurations = await notificationPreferenceService.GetUserNotificationPreferences();
+            var configurations = await notificationPreferenceService.GetUserNotificationPreferencesAsync();
 
             if (configurations == null || !configurations.Any())
             {
@@ -325,7 +323,7 @@ namespace NewsAggregationSystem.Client.Factories
                 AnsiConsole.MarkupLine($"[yellow]Category is already {(categoryStatus ? "[green]Enabled[/]" : "[red]Disabled[/]")}.[/]");
                 return;
             }
-            await notificationPreferenceService.ChangeCategoryStatus(category.CategoryId, categoryStatus);
+            await notificationPreferenceService.UpdateCategoryStatusAsync(category.CategoryId, categoryStatus);
         }
 
         private async Task ToggleKeywordStatus(NotificationPreferencesKeywordDTO keyword, bool keywordStatus)
@@ -337,7 +335,7 @@ namespace NewsAggregationSystem.Client.Factories
             }
             if (keyword.Id != 0)
             {
-                await notificationPreferenceService.ChangeKeywordStatus(keyword.Id, keywordStatus);
+                await notificationPreferenceService.UpdateKeywordStatusAsync(keyword.Id, keywordStatus);
             }
         }
 
@@ -351,7 +349,7 @@ namespace NewsAggregationSystem.Client.Factories
                 return;
             }
 
-            await notificationPreferenceService.AddKeyword(keywordName, category.CategoryId);
+            await notificationPreferenceService.AddKeywordToCategoryAsync(keywordName, category.CategoryId);
         }
 
         private async Task ShowHeadlines()
@@ -400,7 +398,7 @@ namespace NewsAggregationSystem.Client.Factories
         private async Task FetchHeadlinesByDateRangeHandler()
         {
             var validDates = dateTimeHelper.DateValidator();
-            var preferences = await notificationPreferenceService.GetUserNotificationPreferences();
+            var preferences = await notificationPreferenceService.GetUserNotificationPreferencesAsync();
 
             if (validDates == null || preferences == null || !preferences.Any())
             {
@@ -430,7 +428,7 @@ namespace NewsAggregationSystem.Client.Factories
 
         private async Task GetHeadlines(NewsArticleRequestDTO request)
         {
-            var response = await articleService.GetAllArticles(request);
+            var response = await articleService.GetUserArticlesAsync(request);
             if (response.Any())
             {
                 PrintArticles(response);
@@ -463,16 +461,17 @@ namespace NewsAggregationSystem.Client.Factories
             switch (input)
             {
                 case ApplicationConstants.HeadlineSaveArticle:
-                    await articleService.SaveArticle(articleId);
+                    await articleService.SaveArticleAsync(articleId);
                     break;
                 case ApplicationConstants.HeadlineLikeArticle:
-                    await articleService.ReactArticle(articleId, (int)ReactionType.Like);
+                    await articleService.ReactToArticleAsync(articleId, (int)ReactionType.Like);
                     break;
                 case ApplicationConstants.HeadlineDislikeArticle:
-                    await articleService.ReactArticle(articleId, (int)ReactionType.Dislike);
+                    await articleService.ReactToArticleAsync(articleId, (int)ReactionType.Dislike);
                     break;
                 case ApplicationConstants.HeadlineReportArticle:
-                    await reportService.ReportNewsArticle(articleId);
+                    var reason = InputHelper.ReadString("Enter the reason for reporting this article: ");
+                    await reportService.CreateArticleReportAsync(articleId, reason);
                     break;
                 case ApplicationConstants.HeadlineReadArticle:
                     await ReadArticleHandler(articleId);
@@ -510,7 +509,7 @@ namespace NewsAggregationSystem.Client.Factories
         private async Task ShowSavedArticles()
         {
             Console.Clear();
-            var response = await articleService.GetSavedArticles();
+            var response = await articleService.GetUserSavedArticlesAsync();
             if (response != null)
             {
                 PrintArticles(response);
@@ -546,7 +545,7 @@ namespace NewsAggregationSystem.Client.Factories
                 AnsiConsole.MarkupLine("[red]Invalid input. Please enter a valid numeric article ID.[/]");
                 return;
             }
-            await articleService.DeleteSavedArticle(articleId);
+            await articleService.RemoveSavedArticleAsync(articleId);
         }
 
         private void PrintArticles(List<ArticleDTO> articles)
@@ -582,7 +581,7 @@ namespace NewsAggregationSystem.Client.Factories
 
         public async Task ReadArticleHandler(int articleId)
         {
-            var article = await articleService.GetArticleById(articleId);
+            var article = await articleService.GetArticleByIdAsync(articleId);
             if (article != null)
             {
                 Console.Clear();

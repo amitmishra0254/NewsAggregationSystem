@@ -24,12 +24,12 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpGet, Authorize(Roles = ApplicationConstants.UserOnly)]
-        public async Task<IActionResult> GetAll([FromQuery] NewsArticleRequestDTO newsArticleRequestDTO)
+        public async Task<IActionResult> GetUserArticles([FromQuery] NewsArticleRequestDTO newsArticleRequestDTO)
         {
             logger.LogInformation(ApplicationConstants.LogMessage.FetchingArticles, LoggedInUserId);
             try
             {
-                var result = await articleService.GetAllArticles(newsArticleRequestDTO, LoggedInUserId);
+                var result = await articleService.GetUserArticlesAsync(newsArticleRequestDTO, LoggedInUserId);
                 logger.LogInformation("Fetched {Count} articles for user ID: {UserId}", result.Count, LoggedInUserId);
                 return Ok(result);
             }
@@ -41,12 +41,12 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpDelete("delete-saved-article/{Id:int}"), Authorize(Roles = ApplicationConstants.UserOnly)]
-        public async Task<IActionResult> Delete(int Id)
+        public async Task<IActionResult> DeleteUserSavedArticle(int Id)
         {
             logger.LogInformation(ApplicationConstants.LogMessage.DeletingSavedArticle, Id, LoggedInUserId);
             try
             {
-                var result = await articleService.DeleteSavedArticles(Id, LoggedInUserId);
+                var result = await articleService.DeleteUserSavedArticleAsync(Id, LoggedInUserId);
                 if (result == 0)
                     return BadRequest(string.Format(ApplicationConstants.ArticleIsInUnsavedState, Id));
 
@@ -66,12 +66,12 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpGet("saved-articles"), Authorize(Roles = ApplicationConstants.UserOnly)]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetUserSavedArticles()
         {
             logger.LogInformation(ApplicationConstants.LogMessage.FetchingSavedArticles, LoggedInUserId);
             try
             {
-                var result = await articleService.GetAllSavedArticles(LoggedInUserId);
+                var result = await articleService.GetUserSavedArticlesAsync(LoggedInUserId);
                 logger.LogInformation("Fetched {Count} saved articles for user ID: {UserId}", result.Count, LoggedInUserId);
                 return Ok(result);
             }
@@ -83,12 +83,12 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpPost("save-article/{Id:int:min(1)}"), Authorize(Roles = ApplicationConstants.UserOnly)]
-        public async Task<IActionResult> SaveArticle(int Id)
+        public async Task<IActionResult> SaveUserArticle(int Id)
         {
             logger.LogInformation(ApplicationConstants.LogMessage.SavingArticle, Id, LoggedInUserId);
             try
             {
-                var result = await articleService.SaveArticle(Id, LoggedInUserId);
+                var result = await articleService.SaveUserArticleAsync(Id, LoggedInUserId);
                 if (result == 0)
                     return BadRequest(string.Format(ApplicationConstants.ArticleIsAlreadySaved, Id));
 
@@ -108,12 +108,12 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpGet("{Id}"), Authorize(Roles = ApplicationConstants.UserOnly)]
-        public async Task<IActionResult> GetById(int Id)
+        public async Task<IActionResult> GetUserArticleById(int Id)
         {
             logger.LogInformation(ApplicationConstants.LogMessage.FetchingArticleById, Id, LoggedInUserId);
             try
             {
-                var article = await articleService.GetArticleById(Id, LoggedInUserId);
+                var article = await articleService.GetUserArticleByIdAsync(Id, LoggedInUserId);
                 if (article == null)
                 {
                     logger.LogWarning(ApplicationConstants.LogMessage.ArticleNotFound, Id, LoggedInUserId);
@@ -123,6 +123,11 @@ namespace NewsAggregationSystem.API.Controllers
                 logger.LogInformation(ApplicationConstants.LogMessage.ArticleFetchedSuccessfully, Id, LoggedInUserId);
                 return Ok(article);
             }
+            catch (NotFoundException exception)
+            {
+                logger.LogError(exception, exception.Message);
+                return NotFound();
+            }
             catch (Exception exception)
             {
                 logger.LogError(exception, exception.Message);
@@ -130,13 +135,13 @@ namespace NewsAggregationSystem.API.Controllers
             }
         }
 
-        [HttpPost("{Id:int}/react-article{reactionId:int}"), Authorize(Roles = ApplicationConstants.UserOnly)]
-        public async Task<IActionResult> ReactArticle(int Id, int reactionId)
+        [HttpPost("{Id:int}/react-article/{reactionId:int}"), Authorize(Roles = ApplicationConstants.UserOnly)]
+        public async Task<IActionResult> ReactToArticle(int Id, int reactionId)
         {
             logger.LogInformation(ApplicationConstants.LogMessage.ReactingToArticle, LoggedInUserId, Id, reactionId);
             try
             {
-                var result = await articleService.ReactArticle(Id, LoggedInUserId, reactionId);
+                var result = await articleService.ReactToArticleAsync(Id, LoggedInUserId, reactionId);
                 logger.LogInformation(ApplicationConstants.LogMessage.ArticleReactedSuccessfully, Id, LoggedInUserId);
                 return result == 0 ? BadRequest(string.Format(ApplicationConstants.ArticleReactionAlreadyPresentMessage, Id)) : Ok();
             }
@@ -153,12 +158,12 @@ namespace NewsAggregationSystem.API.Controllers
         }
 
         [HttpPost("change-status"), Authorize(Roles = ApplicationConstants.AdminOnly)]
-        public async Task<IActionResult> ToggleVisibility([FromQuery] int articleId, [FromQuery] bool IsHidden)
+        public async Task<IActionResult> ToggleArticleVisibility([FromQuery] int articleId, [FromQuery] bool IsHidden)
         {
             logger.LogInformation(ApplicationConstants.LogMessage.TogglingArticleVisibility, LoggedInUserId, articleId, IsHidden);
             try
             {
-                var result = await articleService.ToggleVisibility(articleId, LoggedInUserId, IsHidden);
+                var result = await articleService.ToggleArticleVisibilityAsync(articleId, LoggedInUserId, IsHidden);
                 if (result == 0)
                     return BadRequest(string.Format(ApplicationConstants.ArticleIsAlreadyHiddenMessage, articleId));
 
@@ -175,13 +180,6 @@ namespace NewsAggregationSystem.API.Controllers
                 logger.LogError(exception, exception.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
             }
-        }
-
-        [HttpGet("test")]
-        public async Task<IActionResult> Test()
-        {
-            await newsFetchScheduler.ExecuteAsync();
-            return Ok();
         }
     }
 }

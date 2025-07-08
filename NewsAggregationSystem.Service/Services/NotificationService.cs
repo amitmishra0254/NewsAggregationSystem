@@ -27,12 +27,12 @@ namespace NewsAggregationSystem.Service.Services
             this.mapper = mapper;
         }
 
-        public async Task<int> AddNotifications(List<Notification> notifications)
+        public async Task<int> CreateNotificationsAsync(List<Notification> notifications)
         {
             return await notificationRepository.AddRangeAsync(notifications);
         }
 
-        public async Task<List<NotificationDTO>> GetAllNotifications(int userId)
+        public async Task<List<NotificationDTO>> GetUserNotificationsAsync(int userId)
         {
             var notifications = await notificationRepository.GetWhere(notification => notification.IsRead == false && notification.UserId == userId).ToListAsync();
             notifications.ForEach(notification => notification.IsRead = true);
@@ -58,7 +58,7 @@ namespace NewsAggregationSystem.Service.Services
             return notifications;
         }
 
-        public async Task<int> NotifyAdminAboutReportedArticle(ReportRequestDTO report, int userId)
+        public async Task<int> NotifyAdminAboutReportedArticleAsync(ReportRequestDTO report, int userId)
         {
             var notification = new Notification
             {
@@ -87,17 +87,17 @@ namespace NewsAggregationSystem.Service.Services
 
         private string BuildNotificationMessage(List<Article> articles)
         {
-            var sb = new StringBuilder();
-            sb.AppendLine($"{ApplicationConstants.NewArticleNotificationTitle}\n");
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine($"{ApplicationConstants.NewArticleNotificationTitle}\n");
 
             foreach (var article in articles)
             {
-                sb.AppendLine($"{article.Title}: {configuration["ArticleRequestUrl"]}{article.Id}\n");
+                stringBuilder.AppendLine($"{article.Title}: {article.Url}\n");
             }
 
-            sb.AppendLine("Stay informed with the latest updates!\n");
+            stringBuilder.AppendLine("Stay informed with the latest updates!\n");
 
-            return sb.ToString();
+            return stringBuilder.ToString();
         }
 
         private List<Article> MatchArticlesForUser(NotificationPreferenceDTO preference, List<Article> articles)
